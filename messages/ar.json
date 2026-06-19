@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "contact": "اتصل بنا",
+    "sellOnModesy": "بيع على موديسي",
+    "cart": "السلة",
+    "wishlist": "قائمة الرغبات",
+    "sellNow": "بع الآن",
+    "login": "تسجيل الدخول",
+    "register": "التسجيل",
+    "location": "الموقع"
+  },
+  "auth": {
+    "connectGoogle": "الاتصال بواسطة جوجل",
+    "orWithEmail": "أو التسجيل بواسطة البريد الإلكتروني",
+    "orWithEmailLogin": "أو تسجيل الدخول بواسطة البريد الإلكتروني",
+    "firstName": "الاسم الأول",
+    "lastName": "الاسم الأخير",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "termsAgree": "لقد قرأت وأوافق على",
+    "termsLink": "الشروط والأحكام",
+    "registerBtn": "تسجيل",
+    "loginBtn": "تسجيل الدخول",
+    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟"
+  },
+  "home": {
+    "specialOffers": "العروض الخاصة",
+    "featuredProducts": "المنتجات المميزة",
+    "newArrivals": "الوصول الجديد",
+    "clothing": "الملابس",
+    "jewelryAccessories": "المجوهرات والاكسسوارات",
+    "viewAll": "عرض الكل"
+  },
+  "topbar": {
+    "contact": "اتصل بنا",
+    "sellOnModesy": "بيع على موديسي",
+    "location": "الموقع",
+    "selectLocation": "تحديد الموقع",
+    "applyLocation": "تطبيق",
+    "clearLocation": "مسح الموقع",
+    "country": "البلد",
+    "state": "الولاية / المنطقة",
+    "selectCountry": "اختر البلد",
+    "selectState": "اختر الولاية",
+    "searchCountry": "البحث عن البلد...",
+    "searchState": "البحث عن الولاية...",
+    "noCountryFound": "لم يتم العثور على البلد.",
+    "noStateFound": "لم يتم العثور على الولاية."
+  }
+}

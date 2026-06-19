@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "contact": "Contact",
+    "sellOnModesy": "Sell on Modesy",
+    "cart": "Cart",
+    "wishlist": "Wishlist",
+    "sellNow": "Sell Now",
+    "login": "Login",
+    "register": "Register",
+    "location": "Location"
+  },
+  "auth": {
+    "connectGoogle": "Connect with Google",
+    "orWithEmail": "Or register with email",
+    "orWithEmailLogin": "Or login with email",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email Address",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "termsAgree": "I have read and agree to the",
+    "termsLink": "Terms & Conditions",
+    "registerBtn": "Register",
+    "loginBtn": "Login",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?"
+  },
+  "home": {
+    "specialOffers": "Special Offers",
+    "featuredProducts": "Featured Products",
+    "newArrivals": "New Arrivals",
+    "clothing": "Clothing",
+    "jewelryAccessories": "Jewelry & Accessories",
+    "viewAll": "View All"
+  },
+  "topbar": {
+    "contact": "Contact",
+    "sellOnModesy": "Sell on Modesy",
+    "location": "Location",
+    "selectLocation": "Select Location",
+    "applyLocation": "Apply",
+    "clearLocation": "Clear location",
+    "country": "Country",
+    "state": "State / Province",
+    "selectCountry": "Select Country",
+    "selectState": "Select State",
+    "searchCountry": "Search country...",
+    "searchState": "Search state...",
+    "noCountryFound": "No country found.",
+    "noStateFound": "No state found."
+  }
+}

@@ -1,0 +1,169 @@
+## Table `languages`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `name` | `varchar` |  |
+| `code` | `varchar` |  Unique |
+| `text_direction` | `varchar` |  Nullable |
+| `is_default` | `bool` |  Nullable |
+| `status` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `currencies`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `name` | `varchar` |  |
+| `code` | `varchar` |  Unique |
+| `symbol` | `varchar` |  |
+| `exchange_rate` | `numeric` |  |
+| `is_default` | `bool` |  Nullable |
+| `status` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `profiles`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `uuid` | Primary |
+| `full_name` | `varchar` |  |
+| `role` | `user_role` |  Nullable |
+| `avatar_url` | `text` |  Nullable |
+| `phone_number` | `varchar` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `vendors`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `user_id` | `uuid` |  Nullable Unique |
+| `shop_name` | `varchar` |  Unique |
+| `shop_slug` | `varchar` |  Unique |
+| `shop_logo` | `text` |  Nullable |
+| `shop_description` | `text` |  Nullable |
+| `balance` | `numeric` |  Nullable |
+| `custom_commission_rate` | `numeric` |  Nullable |
+| `is_verified` | `bool` |  Nullable |
+| `status` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `categories`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `slug` | `varchar` |  Unique |
+| `image_path` | `varchar` |  Nullable |
+| `status` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+
+## Table `category_translations`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `category_id` | `int4` |  Nullable |
+| `language_id` | `int4` |  Nullable |
+| `name` | `varchar` |  |
+
+## Table `products`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `vendor_id` | `int4` |  Nullable |
+| `category_id` | `int4` |  Nullable |
+| `type` | `product_type` |  |
+| `slug` | `varchar` |  Unique |
+| `price` | `numeric` |  |
+| `stock` | `int4` |  |
+| `weight` | `int4` |  Nullable |
+| `is_draft` | `bool` |  Nullable |
+| `status` | `bool` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `product_translations`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `product_id` | `int4` |  Nullable |
+| `language_id` | `int4` |  Nullable |
+| `title` | `varchar` |  |
+| `description` | `text` |  |
+| `short_description` | `varchar` |  Nullable |
+
+## Table `cart_items`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `user_id` | `uuid` |  |
+| `product_id` | `int4` |  |
+| `quantity` | `int4` |  |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `orders`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `user_id` | `uuid` |  Nullable |
+| `order_number` | `varchar` |  Unique |
+| `total_price` | `numeric` |  |
+| `total_shipping_cost` | `numeric` |  |
+| `payment_status` | `varchar` |  Nullable |
+| `payment_method` | `varchar` |  Nullable |
+| `shipping_address` | `text` |  |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
+## Table `order_items`
+
+### Columns
+
+| Name | Type | Constraints |
+|------|------|-------------|
+| `id` | `int4` | Primary |
+| `order_id` | `int4` |  |
+| `vendor_id` | `int4` |  |
+| `product_id` | `int4` |  |
+| `price` | `numeric` |  |
+| `quantity` | `int4` |  |
+| `shipping_cost` | `numeric` |  Nullable |
+| `commission_amount` | `numeric` |  Nullable |
+| `vendor_earning` | `numeric` |  Nullable |
+| `order_status` | `varchar` |  Nullable |
+| `tracking_number` | `varchar` |  Nullable |
+| `created_at` | `timestamptz` |  Nullable |
+| `updated_at` | `timestamptz` |  Nullable |
+
