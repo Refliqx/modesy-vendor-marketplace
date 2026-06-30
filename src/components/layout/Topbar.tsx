@@ -10,6 +10,35 @@ import { CurrencyDropdown } from "@/components/currency/CurrencyDropdown";
 import { LangDropdown } from "@/components/language/LangDropdown";
 import { useLocationStore } from "@/stores/useLocationStore";
 import { LocationModal } from "@/components/features/location/LocationModal";
+import { useCartStore } from "@/stores/useCartStore";
+import { createClient } from "@/lib/supabase/client";
+import { 
+  User, 
+  Wallet, 
+  ShoppingBag, 
+  Tag, 
+  MessageSquare, 
+  Settings, 
+  LogOut, 
+  ChevronDown 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+
+function slugify(text: string) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+}
 
 interface Language {
   id: number;
@@ -25,11 +54,23 @@ export function Topbar({ languages }: { languages: Language[] }) {
   const router = useRouter();
   const openAuthModal = useAuthModalStore((state) => state.open);
 
-  const { selectedCountry, _hasHydrated } = useLocationStore();
+  const { selectedCountry, selectedState, selectedCity, _hasHydrated } = useLocationStore();
+  const user = useCartStore((s) => s.user);
   const [isLocationOpen, setIsLocationOpen] = useState(false);
 
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.refresh();
+  };
+
   const displayLocation = _hasHydrated && selectedCountry 
-    ? selectedCountry.name 
+    ? (() => {
+        const parts = [selectedCity, selectedState?.name].filter(Boolean);
+        return parts.length > 0
+          ? `${parts.join(", ")}, ${selectedCountry.name}`
+          : selectedCountry.name;
+      })()
     : t("location");
 
   return (
@@ -37,13 +78,13 @@ export function Topbar({ languages }: { languages: Language[] }) {
       <div className="hidden md:flex gap-6 items-center">
         <Link 
           href={`/${locale}/contact`} 
-          className="hover:underline hover:opacity-80 transition-opacity"
+          className="hover:opacity-80 transition-opacity"
         >
           {t("contact")}
         </Link>
         <Link 
           href={`/${locale}/sell-on-modesy`} 
-          className="hover:underline hover:opacity-80 transition-opacity"
+          className="hover:opacity-80 transition-opacity"
         >
           {t("sellOnModesy")}
         </Link>
@@ -53,7 +94,7 @@ export function Topbar({ languages }: { languages: Language[] }) {
         <button 
           type="button"
           onClick={() => setIsLocationOpen(true)}
-          className="flex items-center gap-1.5 hover:underline hover:opacity-80 transition-opacity cursor-pointer outline-none"
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer outline-none"
         >
           <MapPin size={14} className="text-primary" />
           <span className="truncate max-w-[150px]">{displayLocation}</span>
@@ -63,23 +104,94 @@ export function Topbar({ languages }: { languages: Language[] }) {
 
         <LangDropdown languages={languages} />
 
-        <div className="flex items-center gap-2">
-          <button 
-            type="button"
-            onClick={openAuthModal}
-            className="hover:underline hover:opacity-80 transition-opacity cursor-pointer"
-          >
-            {navT("login")}
-          </button>
-          <span className="opacity-40 select-none">/</span>
-          <button 
-            type="button"
-            onClick={() => router.push(`/${locale}/register`)}
-            className="hover:underline hover:opacity-80 transition-opacity cursor-pointer text-start"
-          >
-            {navT("register")}
-          </button>
-        </div>
+        {user ? (
+          <DropdownMenu>
+            <DropdownMenuTrigger className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer outline-none select-none py-1">
+              {user.user_metadata?.avatar_url ? (
+                <img 
+                  src={user.user_metadata.avatar_url} 
+                  alt="" 
+                  className="w-7 h-7 rounded-full object-cover shrink-0 border border-white/20" 
+                />
+              ) : (
+                <div className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-topbar-text shrink-0 select-none border border-white/10">
+                  <User size={13} className="fill-white/40 text-white/40" />
+                </div>
+              )}
+              <span className="font-semibold text-topbar-text flex items-center gap-1 font-sans">
+                {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
+                <ChevronDown size={13} className="opacity-70" />
+              </span>
+            </DropdownMenuTrigger>
+            
+            <DropdownMenuContent align="end" className="w-52 bg-white border border-gray-150 rounded-md shadow-lg p-1.5 z-50">
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/profile/${slugify(user.user_metadata?.full_name || user.email?.split("@")[0] || "user")}`}>
+                  <User size={16} className="text-gray-500 shrink-0" />
+                  <span>Profile</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/wallet`}>
+                  <Wallet size={16} className="text-gray-500 shrink-0" />
+                  <span>Wallet</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/orders`}>
+                  <ShoppingBag size={16} className="text-gray-500 shrink-0" />
+                  <span>Orders</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/coupons`}>
+                  <Tag size={16} className="text-gray-500 shrink-0" />
+                  <span>My Coupons</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/messages`}>
+                  <MessageSquare size={16} className="text-gray-500 shrink-0" />
+                  <span>Messages</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/settings`}>
+                  <Settings size={16} className="text-gray-500 shrink-0" />
+                  <span>Profile Settings</span>
+                </Link>
+              </DropdownMenuItem>
+              
+              <DropdownMenuSeparator className="my-1 border-t border-gray-100" />
+              
+              <DropdownMenuItem 
+                onClick={handleLogout}
+                className="hover:bg-red-50 hover:text-red-600 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5"
+              >
+                <LogOut size={16} className="shrink-0" />
+                <span>Logout</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        ) : (
+          <div className="flex items-center gap-2">
+            <button 
+              type="button"
+              onClick={openAuthModal}
+              className="hover:opacity-80 transition-opacity cursor-pointer font-sans"
+            >
+              {navT("login")}
+            </button>
+            <span className="opacity-40 select-none">/</span>
+            <button 
+              type="button"
+              onClick={() => router.push(`/${locale}/register`)}
+              className="hover:opacity-80 transition-opacity cursor-pointer text-start font-sans"
+            >
+              {navT("register")}
+            </button>
+          </div>
+        )}
       </div>
 
       <LocationModal 

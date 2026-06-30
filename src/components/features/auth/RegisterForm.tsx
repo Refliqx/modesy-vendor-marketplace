@@ -50,11 +50,21 @@ export function RegisterForm() {
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: "onChange",
   });
+
+  const formValues = watch();
+  const allFieldsFilled =
+    !!formValues.firstName &&
+    !!formValues.lastName &&
+    !!formValues.email &&
+    !!formValues.password &&
+    !!formValues.confirmPassword &&
+    !!formValues.agreeToTerms;
 
   const onSubmit = async (values: RegisterFormValues) => {
     if (!turnstileToken) {
@@ -217,17 +227,19 @@ export function RegisterForm() {
         )}
       </div>
 
-      <div className="w-full">
-        <Turnstile
-          ref={turnstileRef}
-          siteKey={process.env.NEXT_PUBLIC_CF_TURNSTILE_SITEKEY || "0x4AAAAAADjILkNXIAjY0t3f"}
-          onSuccess={(token: string) => setTurnstileToken(token)}
-          options={{
-            theme: "light",
-            size: "flexible",
-          }}
-        />
-      </div>
+      {allFieldsFilled && (
+        <div className="w-full">
+          <Turnstile
+            ref={turnstileRef}
+            siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAADjILkNXIAjY0t3f"}
+            onSuccess={(token: string) => setTurnstileToken(token)}
+            options={{
+              theme: "light",
+              size: "flexible",
+            }}
+          />
+        </div>
+      )}
 
       <button
         type="submit"

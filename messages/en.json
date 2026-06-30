@@ -1,13 +1,26 @@
 {
   "nav": {
+    "home": "Home",
     "contact": "Contact",
     "sellOnModesy": "Sell on Modesy",
+    "blog": "Blog",
     "cart": "Cart",
     "wishlist": "Wishlist",
     "sellNow": "Sell Now",
     "login": "Login",
     "register": "Register",
     "location": "Location"
+  },
+  "search": {
+    "placeholder": "Search for products, categories or brands",
+    "results": "Search Results",
+    "for": "for",
+    "noResults": "No results found for",
+    "tryDifferent": "Try a different keyword or browse our categories.",
+    "products": "Products",
+    "categories": "Categories",
+    "viewAll": "View all results for",
+    "loading": "Searching..."
   },
   "auth": {
     "connectGoogle": "Connect with Google",
@@ -32,6 +45,8 @@
     "newArrivals": "New Arrivals",
     "clothing": "Clothing",
     "jewelryAccessories": "Jewelry & Accessories",
+    "shopByCategory": "Shop By Category",
+    "promoDeals": "Promo Deals",
     "viewAll": "View All"
   },
   "topbar": {
@@ -48,6 +63,89 @@
     "searchCountry": "Search country...",
     "searchState": "Search state...",
     "noCountryFound": "No country found.",
-    "noStateFound": "No state found."
+    "noStateFound": "No state found.",
+    "city": "City",
+    "selectCity": "Enter your city"
+  },
+  "mobileNav": {
+    "mainMenu": "Main Menu",
+    "categories": "Categories"
+  },
+  "sellOnModesyPage": {
+    "title": "Sell on Modesy",
+    "p1": "At Modesy, we make it easy and hassle-free for you to sell your products to customers all over the world. Whether you are a professional seller or just looking to make some extra cash, Modesy provides you with the perfect platform to showcase your products and reach a wider audience.",
+    "p2": "Our platform is designed to provide you with the tools and support you need to create a successful online business. With a user-friendly interface and powerful features, you can easily list your products, manage your inventory, and process orders.",
+    "p3": "At Modesy, we understand that selling online can be a daunting task. That's why we offer a range of resources to help you succeed. From seller guides and tutorials to customer support and seller forums, we are committed to helping you grow your business and achieve your goals.",
+    "p4": "With Modesy, you can sell a wide range of products, including fashion, beauty, home and garden, electronics, and more. Our platform is designed to provide you with maximum exposure and reach, so you can connect with customers from all over the world.",
+    "p5": "Join the Modesy community today and start selling your products to a global audience. With our powerful platform and dedicated support team, the sky is the limit for your online business."
+  },
+  "contactPage": {
+    "title": "Contact",
+    "p1": "We are here to help you with any questions, concerns, or feedback you may have about our platform. Whether you are a buyer or a seller, our team is dedicated to providing you with the best possible support. If you need assistance with an order, have questions about our platform, or simply want to provide feedback, please don't hesitate to contact us. You can reach us through our contact form, located on this page. Simply fill out the form with your details and a brief message, and we will get back to you as soon as possible.",
+    "p2": "Alternatively, you can also reach us through our social media channels or email. Our team is available to assist you with any questions or concerns you may have.",
+    "leaveMessage": "Leave Message",
+    "name": "Name",
+    "email": "Email Address",
+    "message": "Message",
+    "termsAgree": "I have read and agree to the",
+    "termsLink": "Terms & Conditions",
+    "submit": "Submit",
+    "successMessage": "Your message has been sent successfully!",
+    "termsError": "You must agree to the Terms & Conditions to submit your message."
+  },
+  "shippingTab": {
+    "selectLocation": "Select Your Location",
+    "shippingCost": "Shipping Cost",
+    "shipping": "Shipping",
+    "productLocation": "Product Location",
+    "readyToShip": "Ready to ship in 2-3 Business Days",
+    "selectCountry": "Select Country",
+    "selectState": "Select State",
+    "freeShipping": "Free Shipping",
+    "calculatedShipping": "Estimated shipping to {state}, {country}: {cost}"
+  },
+  "footer": {
+    "categories": "Categories",
+    "quickLinks": "Quick Links",
+    "information": "Information",
+    "copyright": "All Rights Reserved.",
+    "clothing": "Clothing",
+    "shoes": "Shoes",
+    "homeLiving": "Home & Living",
+    "jewelryAccessories": "Jewelry & Accessories",
+    "toysEntertainment": "Toys & Entertainment",
+    "graphicsPhotos": "Graphics & Photos",
+    "videoAudio": "Video & Audio",
+    "webTemplatesCode": "Web Templates & Code",
+    "home": "Home",
+    "blog": "Blog",
+    "shops": "Shops",
+    "affiliateProgram": "Affiliate Program",
+    "helpCenter": "Help Center",
+    "termsConditions": "Terms & Conditions",
+    "aboutUs": "About Us",
+    "privacyPolicy": "Privacy Policy",
+    "cookiePolicy": "Cookie Policy"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "subtitle": "Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
+    "backHome": "Back to Home",
+    "browseProducts": "Browse Products",
+    "searchHint": "Can't find what you're looking for? Try searching.",
+    "searchLink": "Search our store",
+    "goBack": "Go Back"
+  },
+  "newsletter": {
+    "title": "Join Our Newsletter",
+    "subtitle": "Join our subscribers list to get the latest news, updates and special offers directly in your inbox.",
+    "emailPlaceholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "successMessage": "You have successfully subscribed to our newsletter!"
+  },
+  "cookieConsent": {
+    "message": "This site uses cookies. By continuing to browse the site, you are agreeing to our use of cookies.",
+    "cookiePolicy": "Cookie Policy",
+    "accept": "Accept Cookies"
   }
 }

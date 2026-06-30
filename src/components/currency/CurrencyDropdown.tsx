@@ -2,9 +2,17 @@ import { useState, useRef } from "react";
 import { useCurrencyStore } from "@/stores/useCurrencyStore";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { Check, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-export function CurrencyDropdown() {
-  const { currencies, selected, setSelected, _hasHydrated } = useCurrencyStore();
+interface CurrencyDropdownProps {
+  className?: string;
+}
+
+export function CurrencyDropdown({ className }: CurrencyDropdownProps) {
+  const currencies = useCurrencyStore((s) => s.currencies);
+  const selected = useCurrencyStore((s) => s.selected);
+  const setSelected = useCurrencyStore((s) => s.setSelected);
+  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -12,27 +20,30 @@ export function CurrencyDropdown() {
 
   if (!_hasHydrated || !selected) {
     return (
-      <div className="flex items-center gap-1 text-white text-[13px] opacity-80 cursor-not-allowed">
-        <span>$ USD</span>
+      <div className={cn("flex items-center gap-1 opacity-80 cursor-not-allowed", className || "text-white text-[13px]")}>
+        <span>USD ($)</span>
         <ChevronDown size={12} className="opacity-60" />
       </div>
     );
   }
 
   return (
-    <div ref={dropdownRef} className="relative inline-block text-left">
+    <div ref={dropdownRef} className="relative inline-block text-left select-none">
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 hover:underline hover:opacity-80 transition-opacity cursor-pointer outline-none text-white text-[13px]"
+        className={cn(
+          "flex items-center gap-1 hover:opacity-80 transition-opacity cursor-pointer outline-none",
+          className || "text-white text-[13px]"
+        )}
       >
-        <span>{selected.symbol} {selected.code}</span>
+        <span>{selected.code} ({selected.symbol})</span>
         <ChevronDown size={12} className="opacity-60" />
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 bg-white rounded-lg border border-gray-200 shadow-lg min-w-[180px] max-h-72 overflow-y-auto z-50 scrollbar-thin">
-          <div className="py-1">
+        <div className="absolute right-0 mt-1 bg-white rounded-lg border border-gray-200 shadow-lg min-w-[190px] z-50 flex flex-col overflow-hidden">
+          <div className="max-h-60 overflow-y-auto scrollbar-thin py-1">
             {currencies.map((currency) => (
               <button
                 key={currency.code}
@@ -41,12 +52,13 @@ export function CurrencyDropdown() {
                   setSelected(currency);
                   setIsOpen(false);
                 }}
-                className={`w-full flex justify-between items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer font-sans text-[14px] text-start ${
-                  selected.code === currency.code ? "text-primary font-medium" : "text-gray-700"
-                }`}
+                className={cn(
+                  "w-full flex justify-between items-center px-4 py-2.5 hover:bg-gray-50 cursor-pointer font-sans text-[14px] text-start transition-colors",
+                  selected.code === currency.code ? "text-primary font-medium bg-primary/5" : "text-gray-700"
+                )}
               >
                 <span>
-                  {currency.symbol} {currency.code}
+                  {currency.code} ({currency.symbol})
                 </span>
                 {selected.code === currency.code && (
                   <Check size={14} className="text-primary ms-2 shrink-0" />
@@ -59,3 +71,5 @@ export function CurrencyDropdown() {
     </div>
   );
 }
+
+

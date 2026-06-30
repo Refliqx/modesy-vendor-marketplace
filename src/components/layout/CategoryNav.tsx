@@ -1,55 +1,63 @@
 import { getLocale } from "next-intl/server";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { CategoryNavClient } from "./CategoryNavClient";
+
+export interface CategoryNode {
+  id: number;
+  slug: string;
+  name: string;
+  image_path: string | null;
+  children: CategoryNode[];
+}
 
 export async function CategoryNav() {
   const locale = await getLocale();
   const supabase = await createClient();
 
-  // Get language id
   const { data: langData } = await (supabase
     .from("languages")
-    .select()
+    .select("id")
     .eq("code", locale)
     .single() as any);
 
-  const lang = langData as any;
-  const activeLangId = lang?.id || 1;
+  const activeLangId = (langData as any)?.id ?? 1;
 
-  // Fetch categories join language translations
-  const { data: categoriesData } = await (supabase
+  const { data: raw } = await (supabase
     .from("categories")
-    .select("id, slug, image_path, category_translations!inner(name)")
+    .select(
+      "id, slug, image_path, parent_id, status, category_translations!inner(name, language_id)"
+    )
     .eq("status", true)
     .eq("category_translations.language_id", activeLangId) as any);
 
-  const categories = categoriesData as any[];
+  const allCats: any[] = raw ?? [];
 
-  const items = categories?.map((cat) => {
-    const translation = cat.category_translations;
-    const name = Array.isArray(translation)
-      ? translation[0]?.name
-      : (translation as any)?.name;
-    return {
+  const getName = (cat: any): string => {
+    const t = cat.category_translations;
+    return (Array.isArray(t) ? t[0]?.name : t?.name) ?? cat.slug;
+  };
+
+  const map = new Map<number, CategoryNode>();
+  const roots: CategoryNode[] = [];
+
+  for (const cat of allCats) {
+    map.set(cat.id, {
       id: cat.id,
       slug: cat.slug,
-      name: name || cat.slug,
-    };
-  }) || [];
+      name: getName(cat),
+      image_path: cat.image_path ?? null,
+      children: [],
+    });
+  }
 
-  return (
-    <div className="w-full h-12 bg-white border-b border-gray-100 select-none z-20 relative">
-      <div className="max-w-screen-xl mx-auto px-6 h-full flex items-center gap-8 overflow-x-auto no-scrollbar">
-        {items.map((category) => (
-          <Link
-            key={category.id}
-            href={`/${locale}/category/${category.slug}`}
-            className="text-text-main text-sm font-normal whitespace-nowrap hover:text-primary hover:underline underline-offset-4 decoration-primary transition-colors py-1"
-          >
-            {category.name}
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+  for (const cat of allCats) {
+    const node = map.get(cat.id)!;
+    if (cat.parent_id != null && map.has(cat.parent_id)) {
+      map.get(cat.parent_id)!.children.push(node);
+    } else if (cat.parent_id == null) {
+      roots.push(node);
+    }
+  }
+
+  return <CategoryNavClient categories={roots} locale={locale} />;
 }

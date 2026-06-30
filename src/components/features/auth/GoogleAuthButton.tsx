@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+
 import { signInWithGoogle } from "@/lib/auth";
 
 export function GoogleAuthButton() {

@@ -10,21 +10,21 @@ const SLIDES = [
     title: "New Summer Collection",
     subtitle: "Up to 50% Off on Premium Brands",
     image: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?q=80&w=1600&auto=format&fit=crop",
-    link: "/category/clothing",
+    link: "/products/clothing",
   },
   {
     id: 2,
     title: "Minimalist Watch Collection",
     subtitle: "Timeless Design, Modern Elegance",
     image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?q=80&w=1600&auto=format&fit=crop",
-    link: "/category/jewelry-accessories",
+    link: "/products/jewelry-accessories",
   },
   {
     id: 3,
     title: "Modern Home Accessories",
     subtitle: "Crafted for Comfort and Aesthetics",
     image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1600&auto=format&fit=crop",
-    link: "/category/home-living",
+    link: "/products/home-living",
   },
 ];
 
@@ -57,9 +57,9 @@ export function HeroCarousel() {
               src={slide.image}
               alt={slide.title}
               fill
+              sizes="100vw"
               priority
               className="object-cover object-center"
-              unoptimized
             />
             
             {/* Overlay */}

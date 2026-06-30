@@ -13,20 +13,23 @@ interface LocationModalProps {
 
 export function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const t = useTranslations("topbar");
-  const { selectedCountry, selectedState, setCountry, setState, reset, _hasHydrated } = useLocationStore();
+  const { selectedCountry, selectedState, selectedCity, setCountry, setState, setCity, reset, _hasHydrated } = useLocationStore();
 
   const [tempCountry, setTempCountry] = useState<{ name: string; isoCode: string } | null>(null);
   const [tempState, setTempState] = useState<{ name: string; isoCode: string } | null>(null);
+  const [tempCity, setTempCity] = useState<string | null>(null);
 
   const [countryOpen, setCountryOpen] = useState(false);
   const [stateOpen, setStateOpen] = useState(false);
+  const [cityOpen, setCityOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setTempCountry(selectedCountry);
       setTempState(selectedState);
+      setTempCity(selectedCity);
     }
-  }, [isOpen, selectedCountry, selectedState]);
+  }, [isOpen, selectedCountry, selectedState, selectedCity]);
 
   if (!isOpen || !_hasHydrated) return null;
 
@@ -36,6 +39,7 @@ export function LocationModal({ isOpen, onClose }: LocationModalProps) {
   const handleApply = () => {
     setCountry(tempCountry);
     setState(tempState);
+    setCity(tempCity);
     onClose();
   };
 
@@ -43,6 +47,7 @@ export function LocationModal({ isOpen, onClose }: LocationModalProps) {
     reset();
     setTempCountry(null);
     setTempState(null);
+    setTempCity(null);
     onClose();
   };
 
@@ -108,51 +113,73 @@ export function LocationModal({ isOpen, onClose }: LocationModalProps) {
             </Popover>
           </div>
 
-          {tempCountry && states.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-text-muted">
-                {t("state")}
-              </span>
-              <Popover open={stateOpen} onOpenChange={setStateOpen}>
-                <PopoverTrigger asChild>
-                  <button
-                    type="button"
-                    className="w-full h-[52px] border border-border rounded-md px-4 flex justify-between items-center text-sm text-text-main bg-white hover:bg-gray-50 focus:outline-none focus:border-primary transition-all text-start"
-                  >
-                    <span className="truncate">
-                      {tempState ? tempState.name : t("selectState")}
-                    </span>
-                    <ChevronDown size={16} className="text-placeholder ms-2 shrink-0" />
-                  </button>
-                </PopoverTrigger>
-                <PopoverContent className="w-[336px] p-0" align="start">
-                  <Command>
-                    <CommandInput placeholder={t("searchState")} />
-                    <CommandList>
-                      <CommandEmpty>{t("noStateFound")}</CommandEmpty>
-                      <CommandGroup className="max-h-60 overflow-y-auto">
-                        {states.map((s) => (
-                          <CommandItem
-                            key={s.isoCode}
-                            value={s.name}
-                            onSelect={() => {
-                              setTempState({ name: s.name, isoCode: s.isoCode });
-                              setStateOpen(false);
-                            }}
-                            className="flex justify-between items-center cursor-pointer"
-                          >
-                            <span className="truncate">{s.name}</span>
-                            {tempState?.isoCode === s.isoCode && (
-                              <Check size={16} className="text-primary ms-2 shrink-0" />
-                            )}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-            </div>
+          {tempCountry && (
+            <>
+              {/* State / Province selector */}
+              {states.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium text-text-muted">
+                    {t("state")}
+                  </span>
+                  <Popover open={stateOpen} onOpenChange={setStateOpen}>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        className="w-full h-[52px] border border-border rounded-md px-4 flex justify-between items-center text-sm text-text-main bg-white hover:bg-gray-50 focus:outline-none focus:border-primary transition-all text-start"
+                      >
+                        <span className="truncate">
+                          {tempState ? tempState.name : t("selectState")}
+                        </span>
+                        <ChevronDown size={16} className="text-placeholder ms-2 shrink-0" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-[336px] p-0" align="start">
+                      <Command>
+                        <CommandInput placeholder={t("searchState")} />
+                        <CommandList>
+                          <CommandEmpty>{t("noStateFound")}</CommandEmpty>
+                          <CommandGroup className="max-h-60 overflow-y-auto">
+                            {states.map((s) => (
+                              <CommandItem
+                                key={s.isoCode}
+                                value={s.name}
+                                onSelect={() => {
+                                  setTempState({ name: s.name, isoCode: s.isoCode });
+                                  setTempCity(null);
+                                  setStateOpen(false);
+                                }}
+                                className="flex justify-between items-center cursor-pointer"
+                              >
+                                <span className="truncate">{s.name}</span>
+                                {tempState?.isoCode === s.isoCode && (
+                                  <Check size={16} className="text-primary ms-2 shrink-0" />
+                                )}
+                              </CommandItem>
+                            ))}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              )}
+
+              {/* City selector */}
+              {tempState && (
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-sm font-medium text-text-muted">
+                    {t("city")}
+                  </span>
+                  <input
+                    type="text"
+                    value={tempCity || ""}
+                    onChange={(e) => setTempCity(e.target.value)}
+                    placeholder={t("selectCity")}
+                    className="w-full h-[52px] border border-border rounded-md px-4 text-sm text-text-main placeholder-placeholder bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all"
+                  />
+                </div>
+              )}
+            </>
           )}
 
           <button
