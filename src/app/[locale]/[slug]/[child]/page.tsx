@@ -32,7 +32,9 @@ export default function SubCategoryPage() {
   const [showMobileFilter, setShowMobileFilter] = useState(false);
   const [filters, setFilters] = useState({
     brands: [] as string[],
-    fabrics: [] as string[],
+    materials: [] as string[],
+    colors: [] as string[],
+    sizes: [] as string[],
     priceRange: [0, 500] as [number, number],
     keyword: "",
   });

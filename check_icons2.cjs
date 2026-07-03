@@ -1,1 +1,0 @@
-const l = require('lucide-react'); const names = Object.keys(l).filter(k => /^[A-Z]/.test(k)); ['Globe','Users','MessageCircle','Video','Gamepad2','Briefcase','Play','ExternalLink','Link','Share2'].forEach(n => console.log(n + ': ' + names.includes(n)));

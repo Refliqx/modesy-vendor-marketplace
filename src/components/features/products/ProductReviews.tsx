@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Star, MessageSquare } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { submitReview, checkReviewEligibility } from "@/actions/review.actions";
@@ -25,7 +26,7 @@ interface ProductReviewsProps {
   initialReviews: ReviewItem[];
 }
 
-function formatRelativeTime(dateString: string | null) {
+function formatRelativeTime(dateString: string | null, t?: (key: string) => string) {
   if (!dateString) return "";
   const date = new Date(dateString);
   const now = new Date();
@@ -35,14 +36,22 @@ function formatRelativeTime(dateString: string | null) {
   const diffDays = Math.floor(diffHours / 24);
   const diffMonths = Math.floor(diffDays / 30);
 
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
-  if (diffHours < 24) return `${diffHours}h ago`;
-  if (diffDays < 30) return `${diffDays}d ago`;
-  return `${diffMonths}mo ago`;
+  if (!t) {
+    if (diffMins < 1) return "Just now";
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 30) return `${diffDays}d ago`;
+    return `${diffMonths}mo ago`;
+  }
+  if (diffMins < 1) return t("reviews.justNow");
+  if (diffMins < 60) return `${diffMins}${t("reviews.minutesAgo")}`;
+  if (diffHours < 24) return `${diffHours}${t("reviews.hoursAgo")}`;
+  if (diffDays < 30) return `${diffDays}${t("reviews.daysAgo")}`;
+  return `${diffMonths}${t("reviews.monthsAgo")}`;
 }
 
 export function ProductReviews({ productId, initialReviews }: ProductReviewsProps) {
+  const t = useTranslations();
   const [reviews, setReviews] = useState<ReviewItem[]>(initialReviews);
   const user = useCartStore((s) => s.user);
   const [eligibility, setEligibility] = useState({ eligible: false, reviewed: false });
@@ -133,7 +142,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
   return (
     <div id="reviews" className="w-full mt-10 border-t border-gray-100 pt-10 select-none">
       <h2 className="text-xl font-bold text-[#1F2937] mb-6 font-sans">
-        Customer Reviews ({totalReviews})
+        {t("reviews.title")} ({totalReviews})
       </h2>
 
       {/* Aggregate metrics */}
@@ -156,7 +165,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
             ))}
           </div>
           <span className="text-xs text-gray-500 font-sans font-medium">
-            Based on {totalReviews} reviews
+            {t("reviews.basedOn")} {totalReviews} {t("reviews.reviews")}
           </span>
         </div>
 
@@ -186,7 +195,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
         {reviews.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 bg-white rounded-lg border border-gray-100 text-gray-400">
             <MessageSquare size={36} className="text-gray-300 mb-2" />
-            <p className="text-sm font-sans">No reviews yet for this product.</p>
+            <p className="text-sm font-sans">{t("reviews.noReviews")}</p>
           </div>
         ) : (
           reviews.map((r) => {
@@ -221,7 +230,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
                       {r.profiles?.full_name || "User"}
                     </h4>
                     <span className="text-xs text-gray-400 font-sans">
-                      {formatRelativeTime(r.created_at)}
+                      {formatRelativeTime(r.created_at, t)}
                     </span>
                   </div>
 
@@ -239,7 +248,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
                   </div>
 
                   <p className="text-sm text-gray-600 font-sans leading-relaxed whitespace-pre-line">
-                    {r.review || <span className="text-gray-400 italic">No comment provided.</span>}
+                    {r.review || <span className="text-gray-400 italic">{t("reviews.noComment")}</span>}
                   </p>
                 </div>
               </div>
@@ -255,14 +264,14 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
           className="mt-10 border-t border-gray-100 pt-10 flex flex-col gap-4 max-w-xl"
         >
           <h3 className="text-lg font-bold text-[#1F2937] font-sans">
-            {eligibility.reviewed ? "Update your review" : "Leave a review"}
+            {eligibility.reviewed ? t("reviews.updateReview") : t("reviews.leaveReview")}
           </h3>
           <p className="text-xs text-gray-400 -mt-2 font-sans">
-            You purchased this item. Your review will help other shoppers make better decisions.
+            {t("reviews.purchasedMessage")}
           </p>
 
           <div className="flex flex-col gap-2">
-            <span className="text-sm font-semibold text-[#1F2937] font-sans">Rating</span>
+            <span className="text-sm font-semibold text-[#1F2937] font-sans">{t("reviews.rating")}</span>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map((star) => (
                 <button
@@ -287,14 +296,14 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
 
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-[#1F2937] font-sans" htmlFor="review-comment">
-              Comment (Optional)
+              {t("reviews.comment")}
             </label>
             <textarea
               id="review-comment"
               rows={4}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Tell us about your experience with this product..."
+              placeholder={t("reviews.commentPlaceholder")}
               className="w-full border border-gray-200 rounded-md p-3 text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all font-sans"
             />
           </div>
@@ -304,7 +313,7 @@ export function ProductReviews({ productId, initialReviews }: ProductReviewsProp
             disabled={submitting}
             className="w-fit bg-primary text-white font-semibold text-sm px-6 h-11 rounded-md hover:bg-primary-hover transition-colors cursor-pointer outline-none flex items-center gap-2"
           >
-            {submitting ? "Submitting..." : eligibility.reviewed ? "Update Review" : "Submit Review"}
+            {submitting ? t("reviews.submitting") : eligibility.reviewed ? t("reviews.update") : t("reviews.submit")}
           </button>
         </form>
       )}

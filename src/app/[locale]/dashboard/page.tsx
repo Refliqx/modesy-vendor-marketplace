@@ -5,16 +5,17 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import {
   Package, ShoppingBag, DollarSign, Clock, Eye, EyeOff,
-  ChevronDown, ChevronUp, Truck, Search
+  ChevronDown, ChevronUp, Truck, Search, Plus
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Breadcrumb } from "@/components/features/breadcrumb/Breadcrumb";
 import { useCartStore } from "@/stores/useCartStore";
 import { getVendorStats, getVendorProducts, toggleProductStatusAction } from "@/actions/vendor.actions";
 import { getOrderItemsForVendor, updateOrderItemStatus } from "@/actions/order-status.actions";
+import { ProductForm } from "@/components/features/products/ProductForm";
 import { toast } from "sonner";
 
-type Tab = "overview" | "products" | "orders";
+type Tab = "overview" | "products" | "orders" | "add";
 
 export default function VendorDashboardPage() {
   const locale = useLocale();
@@ -24,6 +25,7 @@ export default function VendorDashboardPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [orders, setOrders] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<Tab>("overview");
+  const [editProduct, setEditProduct] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -95,6 +97,7 @@ export default function VendorDashboardPage() {
     { id: "overview", label: "Overview" },
     { id: "products", label: `Products (${products.length})` },
     { id: "orders", label: `Orders (${orders.length})` },
+    { id: "add", label: editProduct ? "Edit Product" : "Add Product" },
   ];
 
   return (
@@ -143,64 +146,91 @@ export default function VendorDashboardPage() {
         )}
 
         {activeTab === "products" && (
-          <div className="border border-gray-100 rounded-lg overflow-hidden bg-white shadow-sm">
-            {products.length === 0 ? (
-              <div className="p-8 text-center text-sm text-gray-400">No products yet.</div>
-            ) : (
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-100">
-                  <tr>
-                    <th className="text-left py-3 px-4 font-semibold text-text-main">Product</th>
-                    <th className="text-left py-3 px-4 font-semibold text-text-main">Price</th>
-                    <th className="text-left py-3 px-4 font-semibold text-text-main">Stock</th>
-                    <th className="text-left py-3 px-4 font-semibold text-text-main">Status</th>
-                    <th className="text-left py-3 px-4 font-semibold text-text-main">Visibility</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {products.map((p: any) => (
-                    <tr key={p.id} className="hover:bg-gray-50/50">
-                      <td className="py-3 px-4">
-                        <div>
-                          <p className="font-medium text-text-main">{p.product_translations?.[0]?.title || p.slug}</p>
-                          <p className="text-[11px] text-gray-400">MD-{p.id}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-text-main font-medium">${Number(p.price).toFixed(2)}</td>
-                      <td className="py-3 px-4 text-gray-600">{p.stock}</td>
-                      <td className="py-3 px-4">{statusBadge(p.status ? "active" : "inactive")}</td>
-                      <td className="py-3 px-4">
-                        <div className="flex gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleToggleProduct(p.id, "status", p.status)}
-                            className={cn(
-                              "w-7 h-7 rounded flex items-center justify-center transition-colors cursor-pointer",
-                              p.status ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
-                            )}
-                            title={p.status ? "Deactivate" : "Activate"}
-                          >
-                            {p.status ? <Eye size={14} /> : <EyeOff size={14} />}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleToggleProduct(p.id, "is_draft", p.is_draft)}
-                            className={cn(
-                              "w-7 h-7 rounded flex items-center justify-center transition-colors cursor-pointer",
-                              p.is_draft ? "bg-yellow-50 text-yellow-600" : "bg-blue-50 text-blue-600"
-                            )}
-                            title={p.is_draft ? "Publish" : "Draft"}
-                          >
-                            {p.is_draft ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                          </button>
-                        </div>
-                      </td>
+          <div>
+            <div className="flex justify-end mb-3">
+              <button
+                type="button"
+                onClick={() => { setEditProduct(null); setActiveTab("add"); }}
+                className="flex items-center gap-1.5 h-9 px-4 bg-primary text-white text-xs font-semibold rounded-md hover:bg-primary-hover transition-colors cursor-pointer"
+              >
+                <Plus size={14} /> Add Product
+              </button>
+            </div>
+            <div className="border border-gray-100 rounded-lg overflow-hidden bg-white shadow-sm">
+              {products.length === 0 ? (
+                <div className="p-8 text-center text-sm text-gray-400">No products yet.</div>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="text-left py-3 px-4 font-semibold text-text-main">Product</th>
+                      <th className="text-left py-3 px-4 font-semibold text-text-main">Price</th>
+                      <th className="text-left py-3 px-4 font-semibold text-text-main">Stock</th>
+                      <th className="text-left py-3 px-4 font-semibold text-text-main">Status</th>
+                      <th className="text-left py-3 px-4 font-semibold text-text-main">Actions</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+                  </thead>
+                  <tbody className="divide-y divide-gray-50">
+                    {products.map((p: any) => (
+                      <tr key={p.id} className="hover:bg-gray-50/50">
+                        <td className="py-3 px-4">
+                          <div>
+                            <p className="font-medium text-text-main">{p.product_translations?.[0]?.title || p.slug}</p>
+                            <p className="text-[11px] text-gray-400">MD-{p.id}</p>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-text-main font-medium">${Number(p.price).toFixed(2)}</td>
+                        <td className="py-3 px-4 text-gray-600">{p.stock}</td>
+                        <td className="py-3 px-4">{statusBadge(p.status ? "active" : "inactive")}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex gap-1">
+                            <button
+                              type="button"
+                              onClick={() => { setEditProduct(p); setActiveTab("add"); }}
+                              className="w-7 h-7 rounded flex items-center justify-center bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors cursor-pointer"
+                              title="Edit"
+                            >
+                              <Package size={14} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleProduct(p.id, "status", p.status)}
+                              className={cn(
+                                "w-7 h-7 rounded flex items-center justify-center transition-colors cursor-pointer",
+                                p.status ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-400"
+                              )}
+                              title={p.status ? "Deactivate" : "Activate"}
+                            >
+                              {p.status ? <Eye size={14} /> : <EyeOff size={14} />}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleProduct(p.id, "is_draft", p.is_draft)}
+                              className={cn(
+                                "w-7 h-7 rounded flex items-center justify-center transition-colors cursor-pointer",
+                                p.is_draft ? "bg-yellow-50 text-yellow-600" : "bg-blue-50 text-blue-600"
+                              )}
+                              title={p.is_draft ? "Publish" : "Draft"}
+                            >
+                              {p.is_draft ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
           </div>
+        )}
+
+        {activeTab === "add" && (
+          <ProductForm
+            initial={editProduct}
+            onSaved={() => { setEditProduct(null); loadData(); setActiveTab("products"); }}
+            onCancel={() => { setEditProduct(null); setActiveTab("products"); }}
+          />
         )}
 
         {activeTab === "orders" && (

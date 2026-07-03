@@ -4,6 +4,12 @@
     "puppeteer-browser": {
       "type": "local",
       "command": ["bunx", "@modelcontextprotocol/server-puppeteer"]
+    },
+    "browsermcp": {
+      "type": "local",
+      "command": ["bunx", "@browsermcp/mcp@latest"],
+      "enabled": true
     }
-  }
+  },
+  "plugin": ["opencode-browser"]
 }

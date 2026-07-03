@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ChevronUp, Users, MessageSquare, Camera, Music, MessageCircle, Video, Headphones, Send, Bookmark, Briefcase, Gamepad2, Globe, Rss, CreditCard } from "lucide-react";
 import { toast } from "sonner";
+import { subscribeNewsletterAction } from "@/actions/newsletter.actions";
 
 
 
@@ -71,9 +72,11 @@ export function Footer() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
+    const res = await subscribeNewsletterAction(email);
+    if (res.error) { toast.error(res.error); return; }
     toast.success("You have successfully subscribed to our newsletter!");
     setEmail("");
   };

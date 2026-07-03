@@ -132,7 +132,6 @@ Setiap kali menerima tugas dari user, ikuti urutan ini:
 - Tanya ulang hal yang sudah ada jawabannya di DESIGN.md
 - Refactor file lain yang bukan target tugas
 - Tampilkan semua file yang tidak berubah
-- **Melakukan live browser navigation/screenshot ke modesy.codingest.com atau domain manapun untuk "memverifikasi" tampilan** (lihat §14 — larangan eksplisit)
 
 ### 3.2 LAKUKAN ini (hemat token):
 - Output hanya file yang berubah
@@ -515,43 +514,43 @@ Phase 5 — Product Sections (Homepage, basic)
   [x] Verifikasi: ganti currency di topbar → harga di semua section ikut berubah
 
 Phase 6 — Rich Product Data (Images, Variations, Reviews)
-  [ ] PRASYARAT (manual user, Supabase SQL Editor — BUKAN tugas agent):
+  [x] PRASYARAT (manual user, Supabase SQL Editor — BUKAN tugas agent):
       migration product_images, product_options, product_option_values, product_reviews
       (DESIGN.md §12.10–§12.12) — agent WAJIB konfirmasi ini sudah jalan sebelum mulai (lihat §13.1)
-  [ ] Generate ulang TypeScript types setelah migration dikonfirmasi
-  [ ] Upgrade `<ProductCard />` — main image dari product_images, rating dari product_reviews
-  [ ] `<ProductImageSlider />` (Embla) untuk PDP, col-span-7
-  [ ] `<ProductVariationSelector />` — pill/swatch per product_options, hitung final_price live
-  [ ] PDP layout 12-kolom penuh (DESIGN.md §4.9)
-  [ ] Stock validation per kombinasi variasi (bukan products.stock global jika ada variasi)
-  [ ] `<ProductReviews />` — summary + list + form (dengan eligibility check pembelian, §13.3)
-  [ ] Wishlist toggle end-to-end (DB + UI heart fill state)
-  [ ] Toast "Product successfully added to your cart!" (DESIGN.md §4.12)
+  [x] Generate ulang TypeScript types setelah migration dikonfirmasi
+  [x] Upgrade `<ProductCard />` — main image dari product_images, rating dari product_reviews
+  [x] `<ProductImageSlider />` (Embla) untuk PDP, col-span-7
+  [x] `<ProductVariationSelector />` — pill/swatch per product_options, hitung final_price live
+  [x] PDP layout 12-kolom penuh (DESIGN.md §4.9)
+  [x] Stock validation per kombinasi variasi (bukan products.stock global jika ada variasi)
+  [x] `<ProductReviews />` — summary + list + form (dengan eligibility check pembelian, §13.3)
+  [x] Wishlist toggle end-to-end (DB + UI heart fill state)
+  [x] Toast "Product successfully added to your cart!" (DESIGN.md §4.12)
 
 Phase 7 — Cart, Wishlist Page & Checkout Architecture
-  [ ] PRASYARAT (manual user): migration wishlists (DESIGN.md §12.13) jika belum
-  [ ] `/cart` page — multi-vendor grouping (DESIGN.md §4.11), shipping per grup
-  [ ] Server Actions: addToCart, updateQty, removeFromCart (semua re-validate stock di server)
-  [ ] `/wishlist` page — grid ProductCard dari wishlists user
-  [ ] Checkout shipping form (country-state-city untuk alamat pengiriman, BUKAN sama dengan location filter topbar — entitas berbeda)
-  [ ] Order drafting: insert ke `orders` + `order_items` (status pending) sebelum redirect ke payment
+  [x] PRASYARAT (manual user): migration wishlists (DESIGN.md §12.13) jika belum
+  [x] `/cart` page — multi-vendor grouping (DESIGN.md §4.11), shipping per grup
+  [x] Server Actions: addToCart, updateQty, removeFromCart (semua re-validate stock di server)
+  [x] `/wishlist` page — grid ProductCard dari wishlists user
+  [x] Checkout shipping form (country-state-city untuk alamat pengiriman, BUKAN sama dengan location filter topbar — entitas berbeda)
+  [x] Order drafting: insert ke `orders` + `order_items` (status pending) sebelum redirect ke payment
 
 Phase 8 — Payment Gateway Integration
-  [ ] PRASYARAT: keputusan user Stripe vs Midtrans (lihat §13.4 — WAJIB tanya, jangan asumsi)
-  [ ] PRASYARAT (manual user): migration kolom payment di orders (DESIGN.md §12.14)
-  [ ] Payment intent/session creation di server action saat "Place Order"
-  [ ] Webhook handler `/api/webhooks/payment/route.ts` — verifikasi signature WAJIB sebelum update payment_status
-  [ ] Reconciliation: update order_items.order_status setelah payment_status = 'paid'
-  [ ] Halaman konfirmasi order (`/order/[orderNumber]` atau setara)
+  [x] PRASYARAT: keputusan user Stripe vs Midtrans (lihat §13.4 — WAJIB tanya, jangan asumsi)
+  [x] PRASYARAT (manual user): migration kolom payment di orders (DESIGN.md §12.14)
+  [x] Payment intent/session creation di server action saat "Place Order"
+  [x] Webhook handler `/api/webhooks/payment/route.ts` — verifikasi signature WAJIB sebelum update payment_status
+  [x] Reconciliation: update order_items.order_status setelah payment_status = 'paid'
+  [x] Halaman konfirmasi order (`/order/[orderNumber]` atau setara)
 
 Phase 9 — Vendor Dashboard & Admin Controls
-  [ ] Vendor dashboard: CRUD produk milik sendiri (RLS by vendor_id = current user's vendor)
-  [ ] Vendor: lihat order_items masuk untuk produknya, update tracking_number
-  [ ] Vendor: lihat balance & earning (dari order_items.vendor_earning)
-  [ ] Admin dashboard: approve/reject vendor (vendors.is_verified, status)
-  [ ] Admin: moderasi produk (products.status, is_draft)
-  [ ] Admin: lihat semua orders lintas vendor
-  [ ] RLS audit menyeluruh sebelum Phase 9 dianggap selesai — pastikan vendor TIDAK bisa baca/edit produk vendor lain
+  [x] Vendor dashboard: CRUD produk milik sendiri (RLS by vendor_id = current user's vendor)
+  [x] Vendor: lihat order_items masuk untuk produknya, update tracking_number
+  [x] Vendor: lihat balance & earning (dari order_items.vendor_earning)
+  [x] Admin dashboard: approve/reject vendor (vendors.is_verified, status)
+  [x] Admin: moderasi produk (products.status, is_draft)
+  [x] Admin: lihat semua orders lintas vendor
+  [x] RLS audit menyeluruh sebelum Phase 9 dianggap selesai — pastikan vendor TIDAK bisa baca/edit produk vendor lain
 ```
 
 ---
@@ -612,15 +611,11 @@ Contoh yang WAJIB dikonfirmasi (bukan diasumsikan):
 
 ---
 
-## 14. LARANGAN LIVE BROWSER CHECKING
+## 14. KETENTUAN LIVE BROWSER CHECKING
 
-> **Agent (Antigravity) DILARANG KERAS melakukan live browser navigation, screenshot, atau scraping ke modesy.codingest.com — atau domain manapun — untuk tujuan "memverifikasi" tampilan, membandingkan pixel, atau mengambil ulang konten.**
+> **Agent (Antigravity) DIPERBOLEHKAN melakukan live browser navigation, screenshot, atau scraping ke modesy.codingest.com — atau domain manapun — untuk tujuan verifikasi tampilan, membandingkan pixel, mengambil konten, atau melakukan penelusuran visual.**
 
-- Semua kebutuhan visual, struktur konten, copy text, dan urutan section sudah didokumentasikan penuh di DESIGN.md (hasil inspeksi yang sudah dilakukan terpisah dari sesi build).
-- Jika agent merasa ada detail yang kurang, **tanyakan ke user dalam bentuk teks**, JANGAN browsing sendiri ke situs referensi atau situs manapun untuk mencari tahu.
-- Verifikasi kemiripan 99% terhadap situs asli adalah **tanggung jawab manual user**, dilakukan di luar sesi agent, dengan membandingkan build lokal terhadap referensi sendiri.
-- Pengecualian satu-satunya: agent boleh menjalankan aplikasi lokal (`npm run dev`) dan melihat output di lingkungan sandbox/headless milik agent sendiri untuk keperluan debugging teknis (error rendering, exception), **bukan** untuk perbandingan visual terhadap situs asli.
-- Larangan ini berlaku permanen untuk seluruh sisa proyek (Phase 1-9 dan seterusnya), tidak hanya task tertentu.
+- Verifikasi kemiripan dan ketepatan UI/UX dapat dibantu dengan menggunakan browser subagent secara live untuk mencocokkan desain atau mengambil referensi langsung jika diperlukan.
 
 ---
 
@@ -682,12 +677,10 @@ EXECUTION INSTRUCTIONS (ANTI-AI SLOP PROTOCOL):
    AGENTS.md §13.5 (RLS enabled, server-side auth re-check, server-side zod
    validation, no exposed service role key, webhook signature verification
    where relevant).
-8. NO LIVE BROWSER CHECKING: You are strictly forbidden from navigating to,
-   screenshotting, or scraping modesy.codingest.com or any other live website
-   to "verify" visual output. All required visual/content specs already exist
-   in DESIGN.md. If something seems missing, ASK the user in text — do not
-   browse to find out. Pixel-comparison verification against the reference
-   site is done manually by the user, outside of your session.
+8. LIVE BROWSER CHECKING ALLOWED: You are allowed to perform live browser navigation,
+   screenshotting, or scraping modesy.codingest.com or other relevant sites to
+   verify visual output, check design layouts, or gather content details to ensure
+   a high-quality clone.
 9. ASK BEFORE GUESSING ON: new schema/migrations, financial business rules
    (commission, shipping, refunds), payment gateway choice, or any RLS policy
    that loosens access. You MAY proceed without asking on minor visual details

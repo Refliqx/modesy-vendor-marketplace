@@ -96,7 +96,7 @@ export function BlogCarouselSection() {
   return (
     <section className="py-10 px-6 max-w-screen-xl mx-auto w-full select-none border-t border-gray-100 mb-10">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-[22px] font-bold text-text-main font-sans">Latest Blog Posts</h2>
+        <h2 className="text-lg sm:text-xl md:text-[22px] font-bold text-text-main font-sans">Latest Blog Posts</h2>
       </div>
 
       {!mounted && (

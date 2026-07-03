@@ -79,7 +79,7 @@ export function CategoryNavClient({
 
   return (
     <div
-      className="w-full bg-white border-b border-gray-100 select-none z-30 relative"
+      className="w-full bg-white border-b border-gray-100 select-none z-30 relative hidden md:block"
       onMouseLeave={mounted ? handleLeave : undefined}
     >
       <div className="max-w-screen-xl mx-auto px-6 h-12 flex items-center gap-8 overflow-x-auto no-scrollbar">

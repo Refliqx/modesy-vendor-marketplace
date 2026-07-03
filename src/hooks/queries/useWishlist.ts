@@ -8,6 +8,8 @@ import {
 } from "@/lib/queries/fetch-wishlist";
 import { toast } from "sonner";
 
+const toSet = (ids: number[]) => new Set(ids);
+
 export function useWishlistIds(userId?: string | null) {
   return useQuery({
     queryKey: ["wishlist", userId ?? "guest"],
@@ -17,7 +19,7 @@ export function useWishlistIds(userId?: string | null) {
       return fetchWishlistAuthenticated(supabase, userId);
     },
     staleTime: 30_000,
-    select: (ids: number[]) => new Set(ids),
+    select: toSet,
   });
 }
 

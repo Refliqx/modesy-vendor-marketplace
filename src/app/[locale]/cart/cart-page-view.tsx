@@ -1,18 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { ShoppingCart, ChevronLeft } from "lucide-react";
 import { Breadcrumb } from "@/components/features/breadcrumb/Breadcrumb";
 import { CartItemRow } from "@/components/features/cart/CartItemRow";
-import { useCurrencyStore } from "@/stores/useCurrencyStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useCartItems } from "@/hooks/queries/useCartItems";
 import { useUpdateCartQty, useRemoveFromCart } from "@/hooks/queries/useCartMutations";
 import { validateCoupon } from "@/lib/dummy/coupons";
 import { toast } from "sonner";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { cn } from "@/lib/utils";
 
 interface CartPageViewProps {
@@ -30,45 +30,29 @@ export function CartPageView({ userId }: CartPageViewProps) {
   const { mutateAsync: removeItem } = useRemoveFromCart();
   const appliedCoupon = useCartStore((s) => s.appliedCoupon);
   const setAppliedCoupon = useCartStore((s) => s.setAppliedCoupon);
+  const formatPrice = useFormatPrice();
 
-  const selected = useCurrencyStore((s) => s.selected);
-  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
-  const [couponInput, setCouponInput] = useState("");
-  const [couponError, setCouponError] = useState(false);
-
-  const formatPrice = (amount: number) => {
-    if (!_hasHydrated || !selected) return "";
-    const converted = amount * (selected.exchange_rate ?? 1);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: selected.code,
-      maximumFractionDigits: 2,
-    }).format(converted);
-  };
-
-  const handleQuantityChange = (id: number, qty: number) => {
+  const handleQuantityChange = useCallback((id: number, qty: number) => {
     updateQty({ itemId: id, quantity: qty, locale });
-  };
+  }, [updateQty, locale]);
 
-  const handleRemove = (id: number) => {
+  const handleRemove = useCallback((id: number) => {
     removeItem({ itemId: id, locale });
-  };
+  }, [removeItem, locale]);
 
-  const handleApplyCoupon = () => {
-    const coupon = validateCoupon(couponInput);
+  const handleApplyCoupon = useCallback((code: string) => {
+    const coupon = validateCoupon(code);
     if (coupon) {
       setAppliedCoupon(coupon);
       toast.success(`Coupon "${coupon.code}" applied successfully!`);
-      setCouponError(false);
+      return true;
     } else {
       toast.error("Invalid coupon code");
-      setCouponError(true);
-      setTimeout(() => setCouponError(false), 1000);
+      return false;
     }
-  };
+  }, [setAppliedCoupon]);
 
-  // Group cart items by vendor ID
-  const groupedItems = cartItems.reduce((groups, item) => {
+  const groupedItems = useMemo(() => cartItems.reduce((groups, item) => {
     const vendorId = item.vendorId;
     if (!groups[vendorId]) {
       groups[vendorId] = {
@@ -79,17 +63,17 @@ export function CartPageView({ userId }: CartPageViewProps) {
     }
     groups[vendorId].items.push(item);
     return groups;
-  }, {} as Record<number, { vendorName: string; vendorSlug: string; items: typeof cartItems }>);
+  }, {} as Record<number, { vendorName: string; vendorSlug: string; items: typeof cartItems }>), [cartItems]);
 
   const uniqueVendorsCount = Object.keys(groupedItems).length;
-  const shippingFee = uniqueVendorsCount * 10; // $10 flat rate per vendor
+  const shippingFee = uniqueVendorsCount * 10;
 
-  const subtotal = cartItems.reduce((sum, item) => {
+  const subtotal = useMemo(() => cartItems.reduce((sum, item) => {
     const unitPrice = item.discountPercent != null 
       ? item.price - (item.price * item.discountPercent) / 100 
       : item.price;
     return sum + unitPrice * item.quantity;
-  }, 0);
+  }, 0), [cartItems]);
 
   const discountAmount = appliedCoupon 
     ? (subtotal * appliedCoupon.discountPercent) / 100 
@@ -218,31 +202,7 @@ export function CartPageView({ userId }: CartPageViewProps) {
                 <span className="text-primary">{formatPrice(total)}</span>
               </div>
 
-              {/* Coupon Code Block */}
-              <div className="mt-6 border-t border-gray-100 pt-5">
-                <label className="block text-sm font-semibold text-text-main mb-2 font-sans">
-                  Discount Coupon
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={couponInput}
-                    onChange={(e) => setCouponInput(e.target.value)}
-                    placeholder="Coupon Code"
-                    className={cn(
-                      "flex-1 h-11 px-3 border rounded-md text-sm text-text-main bg-white placeholder-placeholder focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all font-sans",
-                      couponError ? "border-red-500 focus:ring-red-500/30" : "border-gray-200"
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleApplyCoupon}
-                    className="bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-4 h-11 rounded-md transition-colors cursor-pointer outline-none"
-                  >
-                    Apply
-                  </button>
-                </div>
-              </div>
+              <CouponInput onApply={handleApplyCoupon} />
 
               {/* Checkout Button */}
               {user ? (
@@ -267,6 +227,48 @@ export function CartPageView({ userId }: CartPageViewProps) {
             </div>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CouponInput({ onApply }: { onApply: (code: string) => boolean }) {
+  const [couponInput, setCouponInput] = useState("");
+  const [couponError, setCouponError] = useState(false);
+
+  const handleApplyCoupon = () => {
+    const valid = onApply(couponInput);
+    if (valid) {
+      setCouponError(false);
+    } else {
+      setCouponError(true);
+      setTimeout(() => setCouponError(false), 1000);
+    }
+  };
+
+  return (
+    <div className="mt-6 border-t border-gray-100 pt-5">
+      <label className="block text-sm font-semibold text-text-main mb-2 font-sans">
+        Discount Coupon
+      </label>
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={couponInput}
+          onChange={(e) => setCouponInput(e.target.value)}
+          placeholder="Coupon Code"
+          className={cn(
+            "flex-1 h-11 px-3 border rounded-md text-sm text-text-main bg-white placeholder-placeholder focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 transition-all font-sans",
+            couponError ? "border-red-500 focus:ring-red-500/30" : "border-gray-200"
+          )}
+        />
+        <button
+          type="button"
+          onClick={handleApplyCoupon}
+          className="bg-primary hover:bg-primary-hover text-white text-sm font-semibold px-4 h-11 rounded-md transition-colors cursor-pointer outline-none"
+        >
+          Apply
+        </button>
       </div>
     </div>
   );

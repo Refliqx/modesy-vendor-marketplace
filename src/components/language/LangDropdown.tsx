@@ -24,17 +24,25 @@ export function LangDropdown({ languages, className }: { languages: Language[]; 
 
   const currentLang = languages.find((l) => l.code === locale) || {
     code: locale,
-    name: locale === "ar" ? "Arabic" : "English",
+    name: locale === "ar" ? "العربية" : "English",
     text_direction: locale === "ar" ? "rtl" : "ltr",
   };
 
   const getLanguageName = (code: string) => {
     const cleanCode = code.toLowerCase();
-    const names: Record<string, string> = {
-      en: "English",
-      ar: "Arabic",
-    };
-    return names[cleanCode] || "English";
+    if (locale === "ar") {
+      const names: Record<string, string> = {
+        en: "الإنجليزية",
+        ar: "العربية",
+      };
+      return names[cleanCode] || "الإنجليزية";
+    } else {
+      const names: Record<string, string> = {
+        en: "English",
+        ar: "Arabic",
+      };
+      return names[cleanCode] || "English";
+    }
   };
 
   const getFlagImage = (code: string) => {
@@ -64,7 +72,8 @@ export function LangDropdown({ languages, className }: { languages: Language[]; 
 
     const segments = pathname.split("/");
     segments[1] = newLocale;
-    const newPath = segments.join("/") || `/${newLocale}`;
+    const query = typeof window !== "undefined" ? window.location.search : "";
+    const newPath = (segments.join("/") || `/${newLocale}`) + query;
 
     window.location.href = newPath;
   };

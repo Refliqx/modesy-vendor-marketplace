@@ -14,13 +14,13 @@ import {
   Globe,
   Star,
 } from "lucide-react";
-import { useCurrencyStore } from "@/stores/useCurrencyStore";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useAddToCart } from "@/hooks/queries/useCartMutations";
 import { useWishlistIds, useToggleWishlist } from "@/hooks/queries/useWishlist";
-import { useLocale } from "next-intl";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { ProductVariationSelector, type OptionValue, type ProductOption } from "./ProductVariationSelector";
 
@@ -47,9 +47,9 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
   const [wishlisted, setWishlisted] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState<Record<number, OptionValue>>({});
   
-  const activeCurrency = useCurrencyStore((s) => s.selected);
-  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
+  const formatPrice = useFormatPrice();
   const locale = useLocale();
+  const t = useTranslations();
   const user = useCartStore((s) => s.user);
   const openAuthModal = useAuthModalStore((s) => s.open);
   const { mutateAsync: addToCart } = useAddToCart();
@@ -96,16 +96,6 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
     await addToCart({ productId: product.id, locale, quantity });
   };
 
-  const formatPrice = (amount: number) => {
-    if (!_hasHydrated || !activeCurrency) return "";
-    const converted = amount * (activeCurrency.exchange_rate ?? 1);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: activeCurrency.code,
-      maximumFractionDigits: 2,
-    }).format(converted);
-  };
-
   // Compute live price based on selected variation modifiers
   const basePrice = product.price || 0;
   const modifiersSum = Object.values(selectedOptions).reduce(
@@ -143,7 +133,7 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
       <h1 className="text-2xl md:text-[26px] font-bold text-text-main mb-2 font-sans">{title}</h1>
 
       <div className="flex items-center gap-2 text-sm text-gray-500 mb-2 font-sans">
-        <span>Seller:</span>
+        <span>{t("product.seller")}:</span>
         <Link href={`/${locale}/profile/${shopSlug}`} className="text-primary font-medium hover:underline">
           {shopName}
         </Link>
@@ -163,22 +153,22 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
                   />
                 ))}
               </div>
-              ({reviewsCount} reviews)
+              ({reviewsCount} {t("product.reviews") || "reviews"})
             </Link>
           </>
         )}
       </div>
 
       <div className="flex items-center gap-4 text-xs text-gray-400 mb-4 font-sans">
-        <span className="flex items-center gap-1"><Eye size={14} /> 0 views</span>
-        <span className="flex items-center gap-1"><Heart size={14} /> 0 favorites</span>
-        <span className="flex items-center gap-1"><TrendingUp size={14} /> 0 sold</span>
+        <span className="flex items-center gap-1"><Eye size={14} /> 0 {t("product.views")}</span>
+        <span className="flex items-center gap-1"><Heart size={14} /> 0 {t("product.favorites")}</span>
+        <span className="flex items-center gap-1"><TrendingUp size={14} /> 0 {t("product.sold")}</span>
       </div>
 
       {isQuote ? (
         <div className="my-4 font-sans text-lg font-semibold text-text-muted">
           <Link href={`/${locale}/contact`} className="text-primary underline hover:text-primary-hover">
-            Request a Quote
+            {t("product.requestQuote")}
           </Link>
         </div>
       ) : (
@@ -202,18 +192,18 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
       {/* Product Metadata & Info */}
       <div className="grid grid-cols-2 gap-y-2 text-sm border-t border-b border-gray-100 py-4 mb-6">
         <div>
-          <span className="text-gray-500 font-sans">Status: </span>
+          <span className="text-gray-500 font-sans">{t("product.status")}: </span>
           <span className={isOutOfStock ? "text-red-500 font-medium" : "text-green-600 font-medium"}>
-            {isOutOfStock ? "Out of Stock" : `In Stock (${maxStock})`}
+            {isOutOfStock ? t("product.outOfStock") : `${t("product.inStock")} (${maxStock})`}
           </span>
         </div>
         <div>
-          <span className="text-gray-500 font-sans">SKU: </span>
+          <span className="text-gray-500 font-sans">{t("product.sku")}: </span>
           <span className="text-gray-700 font-sans">MD-{product.id}</span>
         </div>
         {!isDigital && product.weight !== null && (
           <div>
-            <span className="text-gray-500 font-sans">Weight: </span>
+            <span className="text-gray-500 font-sans">{t("product.weight")}: </span>
             <span className="text-gray-700 font-sans">{product.weight} g</span>
           </div>
         )}
@@ -267,7 +257,7 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
               )}
             >
               <ShoppingCart size={18} />
-              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+              {isOutOfStock ? t("product.outOfStock") : t("product.addToCart")}
             </button>
             <button
               type="button"
@@ -280,7 +270,7 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
               )}
             >
               <Heart size={18} className={wishlisted ? "fill-red-500 text-red-500" : ""} />
-              {wishlisted ? "Wishlisted" : "Add to wishlist"}
+              {wishlisted ? t("product.wishlisted") : t("product.addToWishlist")}
             </button>
           </div>
         </>
@@ -290,20 +280,20 @@ export function ProductInfoPanel({ product, reviewsCount, ratingAverage }: Produ
         <div className="bg-gray-50 rounded-md p-3">
           <p className="flex items-center gap-2 text-sm text-gray-600 font-sans">
             <Truck size={16} className="text-primary shrink-0" />
-            Ready to ship in 1 Business Day
+            {t("product.readyToShip")}
           </p>
           <p className="flex items-center gap-2 text-sm text-gray-600 mt-1 font-sans">
             <MapPin size={16} className="text-primary shrink-0" />
-            <span>Estimated Delivery: </span>
+            <span>{t("product.estimatedDelivery")}: </span>
             <button type="button" className="text-primary hover:underline cursor-pointer outline-none font-sans">
-              Select Location
+              {t("product.selectLocation")}
             </button>
           </p>
         </div>
       )}
 
       <div className="flex items-center gap-2 mt-4">
-        <span className="text-sm text-gray-500 font-sans">Share:</span>
+        <span className="text-sm text-gray-500 font-sans">{t("product.share")}:</span>
         <button type="button" className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors cursor-pointer">
           <MessageCircle size={14} className="text-gray-600" />
         </button>

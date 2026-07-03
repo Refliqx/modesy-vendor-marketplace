@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { X } from "lucide-react";
-import { useCurrencyStore } from "@/stores/useCurrencyStore";
+import { memo } from "react";
 import { useLocale } from "next-intl";
 import type { NormalizedCartItem } from "@/types/cart";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 
 interface CartItemRowProps {
   item: NormalizedCartItem;
@@ -13,20 +14,9 @@ interface CartItemRowProps {
   onRemove: (id: number) => void;
 }
 
-export function CartItemRow({ item, onQuantityChange, onRemove }: CartItemRowProps) {
-  const selected = useCurrencyStore((s) => s.selected);
-  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
+function CartItemRowComponent({ item, onQuantityChange, onRemove }: CartItemRowProps) {
   const locale = useLocale();
-
-  const formatPrice = (amount: number) => {
-    if (!_hasHydrated || !selected) return "";
-    const converted = amount * (selected.exchange_rate ?? 1);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: selected.code,
-      maximumFractionDigits: 2,
-    }).format(converted);
-  };
+  const formatPrice = useFormatPrice();
 
   const unitPrice = item.discountPercent != null 
     ? item.price - (item.price * item.discountPercent) / 100 
@@ -97,3 +87,5 @@ export function CartItemRow({ item, onQuantityChange, onRemove }: CartItemRowPro
     </div>
   );
 }
+
+export const CartItemRow = memo(CartItemRowComponent);

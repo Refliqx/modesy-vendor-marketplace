@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Heart, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Breadcrumb } from "@/components/features/breadcrumb/Breadcrumb";
 import { ProductCard } from "@/components/features/products/ProductCard";
 import { useCartStore } from "@/stores/useCartStore";
@@ -15,6 +16,7 @@ interface WishlistPageClientProps {
 }
 
 export function WishlistPageClient({ locale }: WishlistPageClientProps) {
+  const t = useTranslations();
   const user = useCartStore((s) => s.user);
   const { data: wishlistIds, isLoading: idsLoading } = useWishlistIds(user?.id);
   const ids = wishlistIds ? Array.from(wishlistIds) : [];
@@ -35,7 +37,7 @@ export function WishlistPageClient({ locale }: WishlistPageClientProps) {
   if (loading) {
     return (
       <div className="flex flex-col flex-1 select-none">
-        <Breadcrumb items={[{ label: "Home", href: `/${locale}` }, { label: "Wishlist" }]} />
+        <Breadcrumb items={[{ label: t("nav.home"), href: `/${locale}` }, { label: t("wishlistPage.title") }]} />
         <div className="flex-1 flex items-center justify-center py-24">
           <Loader2 className="text-primary animate-spin" size={36} />
         </div>
@@ -46,15 +48,15 @@ export function WishlistPageClient({ locale }: WishlistPageClientProps) {
   if (items.length === 0) {
     return (
       <div className="flex flex-col flex-1 select-none">
-        <Breadcrumb items={[{ label: "Home", href: `/${locale}` }, { label: "Wishlist" }]} />
+        <Breadcrumb items={[{ label: t("nav.home"), href: `/${locale}` }, { label: t("wishlistPage.title") }]} />
         <div className="flex-1 flex flex-col items-center justify-center py-24 px-6">
           <Heart size={64} className="text-gray-300 animate-pulse" />
-          <p className="text-lg font-medium text-gray-500 mt-4">Your wishlist is empty!</p>
+          <p className="text-lg font-medium text-gray-500 mt-4">{t("wishlistPage.empty")}</p>
           <Link
             href={`/${locale}`}
             className="bg-primary text-white px-8 h-11 rounded-md font-semibold mt-6 flex items-center hover:bg-primary-hover transition-colors text-sm shadow-sm"
           >
-            Explore Products
+            {t("wishlistPage.exploreProducts")}
           </Link>
         </div>
       </div>
@@ -63,10 +65,10 @@ export function WishlistPageClient({ locale }: WishlistPageClientProps) {
 
   return (
     <div className="flex flex-col flex-1 select-none">
-      <Breadcrumb items={[{ label: "Home", href: `/${locale}` }, { label: "Wishlist" }]} />
+      <Breadcrumb items={[{ label: t("nav.home"), href: `/${locale}` }, { label: t("wishlistPage.title") }]} />
       <div className="max-w-screen-xl mx-auto px-6 py-8 flex-1 w-full">
         <h1 className="text-3xl font-bold text-text-main mb-6 font-sans">
-          Wishlist <span className="text-gray-400 font-bold text-2xl">({items.length})</span>
+          {t("wishlistPage.title")} <span className="text-gray-400 font-bold text-2xl">({items.length})</span>
         </h1>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {items.map((product) => {

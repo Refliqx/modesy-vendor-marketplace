@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Breadcrumb } from "@/components/features/breadcrumb/Breadcrumb";
 import { dummyBlogPosts } from "@/lib/dummy/blogPosts";
-
 export default function BlogListingPage() {
   const locale = useLocale();
 

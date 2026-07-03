@@ -8,10 +8,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { AlertCircle, ChevronLeft, ChevronRight, Package, Store } from "lucide-react";
 import { Country, State } from "country-state-city";
 import { Breadcrumb } from "@/components/features/breadcrumb/Breadcrumb";
-import { useCurrencyStore } from "@/stores/useCurrencyStore";
 import { useCartStore } from "@/stores/useCartStore";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useCartItems } from "@/hooks/queries/useCartItems";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 
 export default function CheckoutShippingPage() {
   const locale = useLocale();
@@ -20,14 +20,13 @@ export default function CheckoutShippingPage() {
   const authT = useTranslations("auth");
 
   const user = useCartStore((s) => s.user);
-  const { data: cartItems = [] } = useCartItems(locale, user?.id);
+  const { data: cartItems = [], isLoading } = useCartItems(locale, user?.id);
   const appliedCoupon = useCartStore((s) => s.appliedCoupon);
   const shippingAddress = useCartStore((s) => s.shippingAddress);
   const setShippingAddress = useCartStore((s) => s.setShippingAddress);
 
   const openAuthModal = useAuthModalStore((s) => s.open);
-  const selected = useCurrencyStore((s) => s.selected);
-  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
+  const formatPrice = useFormatPrice();
 
   const [form, setForm] = useState({
     firstName: shippingAddress?.firstName || "",
@@ -41,16 +40,6 @@ export default function CheckoutShippingPage() {
     address: shippingAddress?.address || "",
     useSameAddress: shippingAddress?.useSameAddress ?? true,
   });
-
-  const formatPrice = (amount: number) => {
-    if (!_hasHydrated || !selected) return "";
-    const converted = amount * (selected.exchange_rate ?? 1);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: selected.code,
-      maximumFractionDigits: 2,
-    }).format(converted);
-  };
 
   // List of countries for dropdown
   const countries = Country.getAllCountries();
@@ -142,10 +131,21 @@ export default function CheckoutShippingPage() {
 
   // If cart is empty, redirect back to cart
   useEffect(() => {
-    if (cartItems.length === 0) {
+    if (!isLoading && cartItems.length === 0) {
       router.replace(`/${locale}/cart`);
     }
-  }, [cartItems, locale, router]);
+  }, [cartItems, isLoading, locale, router]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col flex-1">
+        <Breadcrumb items={[{ label: "Home", href: `/${locale}` }, { label: "Cart", href: `/${locale}/cart` }, { label: "Checkout" }]} />
+        <div className="flex-1 flex items-center justify-center py-24 select-none">
+          <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    );
+  }
 
   if (cartItems.length === 0) return null;
 

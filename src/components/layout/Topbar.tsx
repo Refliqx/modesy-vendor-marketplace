@@ -19,6 +19,7 @@ import {
   Tag, 
   MessageSquare, 
   Settings, 
+  LayoutDashboard, 
   LogOut, 
   ChevronDown 
 } from "lucide-react";
@@ -74,30 +75,30 @@ export function Topbar({ languages }: { languages: Language[] }) {
     : t("location");
 
   return (
-    <div className="w-full h-10 bg-topbar-bg text-topbar-text text-[13px] font-normal flex items-center justify-between px-6 select-none z-40 relative">
-      <div className="hidden md:flex gap-6 items-center">
+    <div className="w-full h-10 bg-topbar-bg text-topbar-text text-[13px] font-normal hidden md:flex items-center justify-between px-4 sm:px-6 select-none z-40 relative">
+      <div className="hidden md:flex gap-6 items-center shrink-0">
         <Link 
           href={`/${locale}/contact`} 
-          className="hover:opacity-80 transition-opacity"
+          className="hover:opacity-80 transition-opacity whitespace-nowrap"
         >
           {t("contact")}
         </Link>
         <Link 
           href={`/${locale}/sell-on-modesy`} 
-          className="hover:opacity-80 transition-opacity"
+          className="hover:opacity-80 transition-opacity whitespace-nowrap"
         >
           {t("sellOnModesy")}
         </Link>
       </div>
 
-      <div className="flex gap-2 sm:gap-4 items-center ms-auto md:ms-0">
+      <div className="flex gap-1.5 sm:gap-4 items-center ms-auto md:ms-0 shrink-0">
         <button 
           type="button"
           onClick={() => setIsLocationOpen(true)}
-          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer outline-none"
+          className="flex items-center gap-1 hover:sm:gap-1.5 hover:opacity-80 transition-opacity cursor-pointer outline-none shrink-0"
         >
-          <MapPin size={14} className="text-primary" />
-          <span className="truncate max-w-[150px]">{displayLocation}</span>
+          <MapPin size={14} className="text-primary shrink-0" />
+          <span className="hidden sm:inline truncate max-w-[100px] sm:max-w-[150px]">{displayLocation}</span>
         </button>
 
         <CurrencyDropdown />
@@ -106,7 +107,7 @@ export function Topbar({ languages }: { languages: Language[] }) {
 
         {user ? (
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex items-center gap-2 hover:opacity-85 transition-opacity cursor-pointer outline-none select-none py-1">
+            <DropdownMenuTrigger className="flex items-center gap-1.5 hover:opacity-85 transition-opacity cursor-pointer outline-none select-none py-1">
               {user.user_metadata?.avatar_url ? (
                 <img 
                   src={user.user_metadata.avatar_url} 
@@ -118,10 +119,10 @@ export function Topbar({ languages }: { languages: Language[] }) {
                   <User size={13} className="fill-white/40 text-white/40" />
                 </div>
               )}
-              <span className="font-semibold text-topbar-text flex items-center gap-1 font-sans">
+              <span className="hidden sm:inline font-semibold text-topbar-text items-center gap-1 font-sans">
                 {user.user_metadata?.full_name || user.email?.split("@")[0] || "User"}
-                <ChevronDown size={13} className="opacity-70" />
               </span>
+              <ChevronDown size={13} className="opacity-70 shrink-0" />
             </DropdownMenuTrigger>
             
             <DropdownMenuContent align="end" className="w-52 bg-white border border-gray-150 rounded-md shadow-lg p-1.5 z-50">
@@ -153,6 +154,12 @@ export function Topbar({ languages }: { languages: Language[] }) {
                 <Link href={`/${locale}/messages`}>
                   <MessageSquare size={16} className="text-gray-500 shrink-0" />
                   <span>Messages</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">
+                <Link href={`/${locale}/dashboard`}>
+                  <LayoutDashboard size={16} className="text-gray-500 shrink-0" />
+                  <span>Dashboard</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild className="hover:bg-gray-50 rounded cursor-pointer outline-none px-3 py-2 text-sm text-text-main flex items-center gap-2.5">

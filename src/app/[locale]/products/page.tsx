@@ -1,10 +1,16 @@
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CategoryListingPage } from "@/components/features/products/CategoryListingPage";
+import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
+
+export const metadata: Metadata = {
+  title: "Products",
+  description: "Browse all products available on Modesy marketplace.",
+};
 
 export default async function ProductsPage({ params }: PageProps) {
   const { locale } = await params;
@@ -33,9 +39,16 @@ export default async function ProductsPage({ params }: PageProps) {
       price,
       discount_percent,
       category_id,
+      brand_id,
+      color,
+      size,
+      material,
+      is_featured,
+      created_at,
       product_translations!inner(title, short_description),
       product_images(image_url, is_main, row_order),
-      vendors(shop_name, shop_slug)
+      vendors(shop_name, shop_slug),
+      brands(name, slug)
     `)
     .eq("status", true)
     .eq("is_draft", false)
@@ -91,6 +104,72 @@ export default async function ProductsPage({ params }: PageProps) {
       };
     });
 
+  // Fetch brands with product counts
+  const { data: brandsData } = await (supabase
+    .from("brands")
+    .select("id, name, slug")
+    .eq("status", true)
+    .order("name", { ascending: true }) as any);
+
+  const brandCountMap: Record<number, number> = {};
+  for (const p of productsList) {
+    if (p.brand_id != null) {
+      brandCountMap[p.brand_id] = (brandCountMap[p.brand_id] || 0) + 1;
+    }
+  }
+
+  const brands = (brandsData || []).map((b: any) => ({
+    id: b.id,
+    name: b.name,
+    count: brandCountMap[b.id] || 0,
+  }));
+
+  // Fetch colors, sizes, materials with counts
+  const colorCountMap: Record<string, number> = {};
+  const sizeCountMap: Record<string, number> = {};
+  const materialCountMap: Record<string, number> = {};
+  for (const p of productsList) {
+    if (p.color) colorCountMap[p.color] = (colorCountMap[p.color] || 0) + 1;
+    if (p.size) sizeCountMap[p.size] = (sizeCountMap[p.size] || 0) + 1;
+    if (p.material) materialCountMap[p.material] = (materialCountMap[p.material] || 0) + 1;
+  }
+
+  const { data: colorsData } = await (supabase
+    .from("product_colors")
+    .select("name, hex_code")
+    .eq("status", true)
+    .order("name") as any);
+
+  const { data: sizesData } = await (supabase
+    .from("product_sizes")
+    .select("name")
+    .eq("status", true)
+    .order("name") as any);
+
+  const { data: materialsData } = await (supabase
+    .from("product_materials")
+    .select("name")
+    .eq("status", true)
+    .order("name") as any);
+
+  const colors = (colorsData || []).map((c: any) => ({
+    name: c.name,
+    hex_code: c.hex_code,
+    count: colorCountMap[c.name] || 0,
+  }));
+
+  const sizes = (sizesData || []).map((s: any) => ({
+    name: s.name,
+    count: sizeCountMap[s.name] || 0,
+  }));
+
+  const materials = (materialsData || []).map((m: any) => ({
+    name: m.name,
+    count: materialCountMap[m.name] || 0,
+  }));
+
+  const maxPrice = productsList.reduce((max: number, p: any) => Math.max(max, Number(p.price)), 0);
+
   return (
     <CategoryListingPage
       slug="products"
@@ -99,6 +178,11 @@ export default async function ProductsPage({ params }: PageProps) {
       products={productsList || []}
       categories={rootCategories}
       parentCategory={null}
+      brands={brands}
+      colors={colors}
+      sizes={sizes}
+      materials={materials}
+      maxPrice={maxPrice}
     />
   );
 }

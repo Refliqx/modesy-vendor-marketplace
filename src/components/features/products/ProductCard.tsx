@@ -3,12 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingCart, Star } from "lucide-react";
-import { useState } from "react";
-import { useCurrencyStore } from "@/stores/useCurrencyStore";
+import { useState, memo, useCallback } from "react";
 import { useCartStore } from "@/stores/useCartStore";
+import { useTranslations } from "next-intl";
 import { useAuthModalStore } from "@/stores/useAuthModalStore";
 import { useAddToCart } from "@/hooks/queries/useCartMutations";
 import { useToggleWishlist, useWishlistIds } from "@/hooks/queries/useWishlist";
+import { useFormatPrice } from "@/hooks/useFormatPrice";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useLocale } from "next-intl";
@@ -44,7 +45,7 @@ interface ProductCardProps {
   onWishlistToggle?: (wishlisted: boolean) => void;
 }
 
-export function ProductCard({
+const ProductCardComponent = memo(function ProductCard({
   product,
   categoryName,
   title,
@@ -54,37 +55,25 @@ export function ProductCard({
   onWishlistToggle,
 }: ProductCardProps) {
   const locale = useLocale();
+  const t = useTranslations();
   const [localWishlisted, setLocalWishlisted] = useState<boolean | null>(null);
-  const selected = useCurrencyStore((s) => s.selected);
-  const _hasHydrated = useCurrencyStore((s) => s._hasHydrated);
+  const formatPrice = useFormatPrice();
   const user = useCartStore((s) => s.user);
   const { data: wishlistedIds } = useWishlistIds(user?.id);
   const openAuthModal = useAuthModalStore((s) => s.open);
 
   const wishlisted = localWishlisted ?? (initialWishlisted ?? wishlistedIds?.has(product.id) ?? false);
 
-  const formatPrice = (amount: number) => {
-    if (!_hasHydrated || !selected) return "";
-    const converted = amount * (selected.exchange_rate ?? 1);
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency: selected.code,
-      maximumFractionDigits: 2,
-    }).format(converted);
-  };
-
   const discountedPrice =
     product.discount_percent != null
       ? product.price - (product.price * product.discount_percent) / 100
       : null;
 
-  // Resolve Vendor Info
   const vendorData = product.vendors;
   const vendor = Array.isArray(vendorData) ? vendorData[0] : vendorData;
   const shopName = vendor?.shop_name || "Admin";
   const shopSlug = vendor?.shop_slug || "admin";
 
-  // Resolve Main Image
   let imageUrl = `https://picsum.photos/seed/product-${product.id}/400/400`;
   if (product.product_images && product.product_images.length > 0) {
     const mainImage = product.product_images.find((img) => img.is_main === true);
@@ -103,36 +92,29 @@ export function ProductCard({
   const addToCartMutation = useAddToCart();
   const toggleWishlistMutation = useToggleWishlist();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
+  const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
-    if (!user) {
-      openAuthModal();
-      return;
-    }
-
+    if (!user) { openAuthModal(); return; }
     addToCartMutation.mutate({ productId: product.id, locale });
-  };
+  }, [user, product.id, locale, addToCartMutation, openAuthModal]);
 
-  const handleWishlistClick = async (e: React.MouseEvent) => {
+  const handleWishlistClick = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-
     const nextState = !wishlisted;
     setLocalWishlisted(nextState);
-    if (onWishlistToggle) {
-      onWishlistToggle(nextState);
-    }
-
+    if (onWishlistToggle) onWishlistToggle(nextState);
     toggleWishlistMutation.mutate(product.id, {
       onSettled: () => setLocalWishlisted(null),
     });
-  };
+  }, [wishlisted, onWishlistToggle, toggleWishlistMutation, product.id]);
+
+  const hasRating = rating_count != null && rating_count > 0 && rating_average != null;
 
   return (
     <div className="group w-full block bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200 relative">
-      <div className="relative aspect-square">
+      <div className="relative aspect-[4/5]">
         <Link href={`/${locale}/${product.slug}`} className="block w-full h-full relative">
           <Image
             src={imageUrl}
@@ -142,93 +124,90 @@ export function ProductCard({
             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
           />
         </Link>
-        <div className="absolute top-2 left-2 flex flex-col gap-1 z-10">
+        <div className="absolute top-1.5 left-1.5 flex flex-col gap-1 z-10">
           {product.is_featured && (
-            <span className="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-sm tracking-wide uppercase">
-              Featured
+            <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm tracking-wide uppercase">
+              {t("product.featured")}
             </span>
           )}
           {product.discount_percent != null && (
-            <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-sm self-start">
+            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-sm self-start">
               -{product.discount_percent}%
             </span>
           )}
         </div>
-        <div className="absolute top-2 right-2 flex flex-col gap-1.5 z-20">
-          <button
-            type="button"
-            onClick={handleWishlistClick}
-            className={cn(
-              "w-8 h-8 rounded-full bg-white/90 flex items-center justify-center transition-opacity duration-200",
-              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
-            )}
-            aria-label="Toggle wishlist"
-          >
-            <Heart
-              size={16}
-              className={cn(
-                "transition-colors",
-                wishlisted ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-500"
-              )}
-            />
-          </button>
+        <div className="absolute top-1.5 right-1.5 z-20 flex flex-col gap-1.5">
           <button
             type="button"
             onClick={handleAddToCart}
             className={cn(
-              "w-8 h-8 rounded-full bg-white/90 flex items-center justify-center transition-opacity duration-200",
+              "w-9 h-9 rounded-full bg-white/90 flex items-center justify-center transition-opacity duration-200 shadow-sm",
               "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
             )}
-            aria-label="Add to cart"
+            aria-label={t("product.addToCart")}
           >
-            <ShoppingCart size={16} className="text-gray-400 hover:text-primary transition-colors" />
+            <ShoppingCart size={14} className="text-gray-400 hover:text-primary transition-colors" />
+          </button>
+          <button
+            type="button"
+            onClick={handleWishlistClick}
+            className={cn(
+              "w-9 h-9 rounded-full bg-white/90 flex items-center justify-center transition-opacity duration-200 shadow-sm",
+              "opacity-100 sm:opacity-0 sm:group-hover:opacity-100"
+            )}
+            aria-label={wishlisted ? t("product.wishlisted") : t("product.addToWishlist")}
+          >
+            <Heart
+              size={14}
+              className={cn(
+                "transition-colors",
+                wishlisted ? "fill-red-500 text-red-500" : "text-gray-400 hover:text-red-400"
+              )}
+            />
           </button>
         </div>
       </div>
-      <div className="p-3">
-        {/* Vendor label */}
-        <p className="text-[11px] text-gray-400 hover:text-primary transition-colors truncate mb-1">
-          <Link href={`/${locale}/profile/${shopSlug}`} className="font-medium relative z-10">
-            {shopName}
-          </Link>
-        </p>
-        <h3 className="text-sm font-medium text-[#1F2937] line-clamp-2 min-h-[2.5rem] mb-1">
+      <div className="p-2.5 flex flex-col gap-1 h-[136px]">
+        <h3 className="text-sm font-medium text-[#1F2937] line-clamp-2 leading-snug">
           <Link href={`/${locale}/${product.slug}`} className="hover:text-primary transition-colors">
             {title}
           </Link>
         </h3>
-        <div className="flex items-center gap-3 mb-1.5 select-none text-[11px] text-gray-400 font-sans">
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => {
-              const avg = rating_average ?? 5;
-              return (
+        <p className="text-[11px] text-gray-400 truncate">
+          <Link href={`/${locale}/profile/${shopSlug}`} className="hover:text-primary transition-colors">
+            {shopName}
+          </Link>
+        </p>
+        <div className="flex items-center justify-between mt-auto">
+          <div className="flex items-center gap-1 select-none text-[11px] text-gray-400">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  size={12}
+                  size={10}
                   className={cn(
                     "stroke-none",
-                    i < Math.round(avg) ? "fill-yellow-400" : "fill-gray-200"
+                    i < (hasRating ? Math.round(rating_average) : 0) ? "fill-yellow-400" : "fill-gray-200"
                   )}
                 />
-              );
-            })}
-          </div>
-          <div className="flex items-center gap-1">
-            <Heart size={12} className="text-gray-300 fill-gray-300" />
-            <span className="text-gray-500 font-bold">{((product.id * 3 + 2) % 8) + 1}</span>
+              ))}
+            </div>
+            <span className="text-gray-500">{hasRating ? `(${rating_count})` : "(0)"}</span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-auto">
           {discountedPrice != null ? (
             <>
-              <span className="text-base font-bold text-primary">{formatPrice(discountedPrice)}</span>
-              <span className="text-sm text-gray-400 line-through">{formatPrice(product.price)}</span>
+              <span className="text-sm font-bold text-primary">{formatPrice(discountedPrice)}</span>
+              <span className="text-xs text-gray-400 line-through">{formatPrice(product.price)}</span>
             </>
           ) : (
-            <span className="text-base font-bold text-[#1F2937]">{formatPrice(product.price)}</span>
+            <span className="text-sm font-bold text-[#1F2937]">{formatPrice(product.price)}</span>
           )}
         </div>
       </div>
     </div>
   );
-}
+});
+
+export const ProductCard = ProductCardComponent;

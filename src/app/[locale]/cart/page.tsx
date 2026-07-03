@@ -2,10 +2,16 @@ import { QueryClient, dehydrate, HydrationBoundary } from "@tanstack/react-query
 import { createClient } from "@/lib/supabase/server";
 import { fetchCartAuthenticated, fetchCartGuest } from "@/lib/queries/fetch-cart";
 import { CartPageView } from "./cart-page-view";
+import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
+
+export const metadata: Metadata = {
+  title: "Shopping Cart",
+  description: "Review your items, update quantities, and proceed to checkout on Modesy.",
+};
 
 export default async function CartPage({ params }: PageProps) {
   const { locale } = await params;

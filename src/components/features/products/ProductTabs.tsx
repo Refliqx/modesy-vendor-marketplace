@@ -14,6 +14,9 @@ interface ProductTabsProps {
     discount_percent: number | null;
     stock: number;
     type: string;
+    color?: string | null;
+    size?: string | null;
+    material?: string | null;
     product_translations: { title: string; description: string; short_description: string | null }[] | { title: string; description: string; short_description: string | null } | null;
     weight: number | null;
     vendor_id: number | null;
@@ -26,18 +29,19 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
   const [selectedCountryIso, setSelectedCountryIso] = useState("");
   const [selectedStateIso, setSelectedStateIso] = useState("");
 
-  const t = useTranslations("shippingTab");
+  const st = useTranslations("shippingTab");
+  const t = useTranslations();
 
   const translations = product.product_translations;
   const translation = Array.isArray(translations) ? translations[0] : translations;
   const description = translation?.description || "";
 
   const tabs = [
-    { id: "description", label: "Description" },
-    { id: "additional", label: "Additional Info" },
-    { id: "shipping", label: "Shipping & Location" },
-    { id: "reviews", label: `Reviews (${reviews.length})` },
-    { id: "comments", label: "Comments (0)" },
+    { id: "description", label: t("productTabs.description") },
+    { id: "additional", label: t("productTabs.additionalInfo") },
+    { id: "shipping", label: t("productTabs.shipping") },
+    { id: "reviews", label: `${t("productTabs.reviews")} (${reviews.length})` },
+    { id: "comments", label: `${t("productTabs.comments")} (0)` },
   ];
 
   return (
@@ -63,9 +67,9 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
       <div className="py-6">
         {activeTab === "description" && (
           <div>
-            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{description || "No description available."}</p>
+            <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{description || t("product.noDescription")}</p>
             <button type="button" className="text-xs text-gray-400 underline mt-3 hover:text-gray-600 cursor-pointer outline-none">
-              Report this product
+              {t("product.reportThisProduct")}
             </button>
           </div>
         )}
@@ -74,9 +78,12 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
           <table className="w-full text-sm border-collapse">
             <tbody>
               {[
-                { label: "SKU", value: `MD-${product.id}` },
-                { label: "Weight", value: product.weight ? `${product.weight} g` : "N/A" },
-                { label: "Condition", value: "New" },
+                { label: t("product.sku"), value: `MD-${product.id}` },
+                { label: t("product.weight"), value: product.weight ? `${product.weight} g` : t("productTabs.na") },
+                { label: t("product.condition"), value: t("product.new") },
+                ...(product.color ? [{ label: t("productTabs.color"), value: product.color }] : []),
+                ...(product.size ? [{ label: t("productTabs.size"), value: product.size }] : []),
+                ...(product.material ? [{ label: t("productTabs.material"), value: product.material }] : []),
               ].map((row, idx) => (
                 <tr key={idx} className={cn(idx % 2 === 0 && "bg-gray-50")}>
                   <td className="py-2.5 px-3 font-medium text-gray-700 w-1/3">{row.label}</td>
@@ -93,10 +100,10 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
               <table className="w-full text-sm border-collapse">
                 <tbody>
                   <tr className="bg-gray-50 border-b border-gray-200">
-                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3 align-top">{t("shippingCost")}</td>
+                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3 align-top">{st("shippingCost")}</td>
                     <td className="py-4 px-4 text-gray-600">
                       <div className="flex flex-col gap-3">
-                        <span className="font-semibold text-text-main text-xs uppercase tracking-wider">{t("selectLocation")}</span>
+                        <span className="font-semibold text-text-main text-xs uppercase tracking-wider">{st("selectLocation")}</span>
                         <div className="flex flex-wrap gap-3">
                           <select
                             value={selectedCountryIso}
@@ -106,7 +113,7 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
                             }}
                             className="h-[40px] px-3 border border-gray-200 rounded-md text-sm text-text-main placeholder-placeholder bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 min-w-[180px] cursor-pointer"
                           >
-                            <option value="">{t("selectCountry")}</option>
+                            <option value="">{st("selectCountry")}</option>
                             {Country.getAllCountries().map((c) => (
                               <option key={c.isoCode} value={c.isoCode}>
                                 {c.name}
@@ -120,7 +127,7 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
                             disabled={!selectedCountryIso}
                             className="h-[40px] px-3 border border-gray-200 rounded-md text-sm text-text-main placeholder-placeholder bg-white focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 min-w-[180px] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            <option value="">{t("selectState")}</option>
+                            <option value="">{st("selectState")}</option>
                             {selectedCountryIso &&
                               State.getStatesOfCountry(selectedCountryIso).map((s) => (
                                 <option key={s.isoCode} value={s.isoCode}>
@@ -133,7 +140,7 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
                         <div className="text-xs font-medium text-gray-500 mt-1">
                           {selectedCountryIso ? (
                             <span>
-                              {t("calculatedShipping", {
+                              {st("calculatedShipping", {
                                 country: Country.getCountryByCode(selectedCountryIso)?.name || "",
                                 state: selectedStateIso ? State.getStateByCodeAndCountry(selectedStateIso, selectedCountryIso)?.name || "" : "Any State",
                                 cost: selectedCountryIso === "US" ? "$5.00" : "$15.00",
@@ -147,13 +154,13 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
                     </td>
                   </tr>
                   <tr className="border-b border-gray-200">
-                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3">{t("shipping")}</td>
+                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3">{st("shipping")}</td>
                     <td className="py-4 px-4 text-gray-600 font-medium">
-                      {t("readyToShip")}
+                      {st("readyToShip")}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3">{t("productLocation")}</td>
+                    <td className="py-4 px-4 font-semibold text-gray-700 w-1/3">{st("productLocation")}</td>
                     <td className="py-4 px-4 text-gray-600 font-medium">
                       Florida, United States
                     </td>
@@ -180,9 +187,9 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
 
         {activeTab === "comments" && (
           <div>
-            <p className="text-sm text-gray-500 mb-4">No comments yet. Be the first to comment!</p>
+            <p className="text-sm text-gray-500 mb-4">{t("productTabs.noComments")}</p>
             <textarea
-              placeholder="Write a comment..."
+              placeholder={t("productTabs.writeComment")}
               rows={3}
               className="w-full border border-border rounded-md p-3 text-sm text-text-main placeholder-placeholder focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary/30 mb-3"
             />
@@ -191,9 +198,9 @@ export function ProductTabs({ product, reviews }: ProductTabsProps) {
                 type="button"
                 className="bg-primary text-white h-10 px-6 rounded-md text-sm font-semibold hover:bg-primary-hover transition-colors cursor-pointer"
               >
-                Post Comment
+                {t("productTabs.postComment")}
               </button>
-              <p className="text-xs text-gray-400">Verification is required</p>
+              <p className="text-xs text-gray-400">{t("productTabs.verificationRequired")}</p>
             </div>
           </div>
         )}

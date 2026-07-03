@@ -66,7 +66,7 @@ export function ProductCarouselSection({
       {!mounted ? (
         <>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[22px] font-bold text-text-main">{title}</h2>
+            <h2 className="text-lg sm:text-xl md:text-[22px] font-bold text-text-main">{title}</h2>
             <Link
               href={viewAllHref}
               className="flex items-center gap-1 text-sm text-primary hover:underline font-medium animate-pulse"
@@ -81,7 +81,7 @@ export function ProductCarouselSection({
       ) : (
         <div>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-[22px] font-bold text-text-main">{title}</h2>
+            <h2 className="text-lg sm:text-xl md:text-[22px] font-bold text-text-main">{title}</h2>
             <Link
               href={viewAllHref}
               className="flex items-center gap-1 text-sm text-primary hover:underline font-medium"

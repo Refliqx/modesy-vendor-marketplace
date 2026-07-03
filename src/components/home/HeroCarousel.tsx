@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const SLIDES = [
@@ -29,6 +30,7 @@ const SLIDES = [
 ];
 
 export function HeroCarousel() {
+  const t = useTranslations();
   const [current, setCurrent] = useState(0);
 
   const nextSlide = useCallback(() => {
@@ -74,7 +76,7 @@ export function HeroCarousel() {
                 type="button"
                 className="mt-6 w-fit bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-md font-semibold text-sm transition-all duration-200 cursor-pointer shadow-md hover:-translate-y-0.5 active:translate-y-0"
               >
-                Buy Now
+                {t("product.buyNow")}
               </button>
             </div>
           </div>
@@ -86,7 +88,7 @@ export function HeroCarousel() {
         onClick={prevSlide}
         type="button"
         className="absolute top-1/2 -translate-y-1/2 left-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white cursor-pointer z-20 transition-all"
-        aria-label="Previous Slide"
+        aria-label={t("hero.previousSlide")}
       >
         <ChevronLeft size={20} />
       </button>
@@ -96,7 +98,7 @@ export function HeroCarousel() {
         onClick={nextSlide}
         type="button"
         className="absolute top-1/2 -translate-y-1/2 right-4 w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white cursor-pointer z-20 transition-all"
-        aria-label="Next Slide"
+        aria-label={t("hero.nextSlide")}
       >
         <ChevronRight size={20} />
       </button>
@@ -113,7 +115,7 @@ export function HeroCarousel() {
                 ? "w-6 h-2 bg-white rounded-full" 
                 : "w-2 h-2 bg-white/50 rounded-full hover:bg-white/80"
             } cursor-pointer`}
-            aria-label={`Go to slide ${index + 1}`}
+            aria-label={`${t("hero.goToSlide")} ${index + 1}`}
           />
         ))}
       </div>

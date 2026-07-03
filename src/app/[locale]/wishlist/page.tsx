@@ -3,10 +3,16 @@ import { createClient } from "@/lib/supabase/server";
 import { WishlistPageClient } from "@/components/features/products/WishlistPageClient";
 import { fetchWishlistAuthenticated } from "@/lib/queries/fetch-wishlist";
 import { fetchWishlistProducts } from "@/lib/queries/fetch-wishlist-products";
+import type { Metadata } from "next";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
+
+export const metadata: Metadata = {
+  title: "Wishlist",
+  description: "View and manage your saved products on Modesy.",
+};
 
 export default async function WishlistPage({ params }: PageProps) {
   const { locale } = await params;

@@ -48,7 +48,7 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
     <section className="py-12 px-6 max-w-screen-xl mx-auto select-none">
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
-        <h2 className="text-[22px] font-bold text-text-main">
+        <h2 className="text-lg sm:text-xl md:text-[22px] font-bold text-text-main">
           Shop By Category
         </h2>
         <Link 

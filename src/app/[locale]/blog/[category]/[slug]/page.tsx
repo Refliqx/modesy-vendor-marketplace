@@ -66,7 +66,7 @@ export default function BlogDetailPage() {
 
       {related.length > 0 && (
         <section className="max-w-screen-xl mx-auto px-6 py-12 w-full border-t border-gray-100">
-          <h2 className="text-[22px] font-bold text-text-main mb-6">Related Posts</h2>
+          <h2 className="text-lg sm:text-xl md:text-[22px] font-bold text-text-main mb-6">Related Posts</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {related.map((rp) => (
               <Link

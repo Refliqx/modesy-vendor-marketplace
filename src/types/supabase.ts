@@ -179,6 +179,92 @@ export type Database = {
           },
         ]
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: number
+          created_at: string | null
+          id: number
+          last_read_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conversation_id: number
+          created_at?: string | null
+          id?: number
+          last_read_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conversation_id?: number
+          created_at?: string | null
+          id?: number
+          last_read_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string | null
+          id: number
+          subject: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          subject?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          discount_percent: number
+          expires_at: string | null
+          id: number
+          is_active: boolean | null
+          max_uses: number | null
+          used_count: number | null
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          discount_percent?: number
+          expires_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          max_uses?: number | null
+          used_count?: number | null
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          discount_percent?: number
+          expires_at?: string | null
+          id?: number
+          is_active?: boolean | null
+          max_uses?: number | null
+          used_count?: number | null
+        }
+        Relationships: []
+      }
       currencies: {
         Row: {
           code: string
@@ -245,6 +331,59 @@ export type Database = {
           status?: boolean | null
           text_direction?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          conversation_id: number
+          created_at: string | null
+          id: number
+          sender_id: string
+        }
+        Insert: {
+          body: string
+          conversation_id: number
+          created_at?: string | null
+          id?: number
+          sender_id: string
+        }
+        Update: {
+          body?: string
+          conversation_id?: number
+          created_at?: string | null
+          id?: number
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: number
+          is_active: boolean | null
+          subscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: number
+          is_active?: boolean | null
+          subscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: number
+          is_active?: boolean | null
+          subscribed_at?: string | null
         }
         Relationships: []
       }
@@ -412,6 +551,30 @@ export type Database = {
           },
         ]
       }
+      product_colors: {
+        Row: {
+          created_at: string | null
+          hex_code: string | null
+          id: number
+          name: string
+          status: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          hex_code?: string | null
+          id?: never
+          name: string
+          status?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          hex_code?: string | null
+          id?: never
+          name?: string
+          status?: boolean | null
+        }
+        Relationships: []
+      }
       product_images: {
         Row: {
           created_at: string | null
@@ -446,6 +609,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_materials: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          status: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          name: string
+          status?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          name?: string
+          status?: boolean | null
+        }
+        Relationships: []
       }
       product_option_values: {
         Row: {
@@ -543,6 +727,27 @@ export type Database = {
           },
         ]
       }
+      product_sizes: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+          status: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: never
+          name: string
+          status?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: never
+          name?: string
+          status?: boolean | null
+        }
+        Relationships: []
+      }
       product_translations: {
         Row: {
           description: string
@@ -589,12 +794,15 @@ export type Database = {
         Row: {
           brand_id: number | null
           category_id: number | null
+          color: string | null
           created_at: string | null
           discount_percent: number | null
           id: number
           is_draft: boolean | null
           is_featured: boolean | null
+          material: string | null
           price: number
+          size: string | null
           slug: string
           status: boolean | null
           stock: number
@@ -606,12 +814,15 @@ export type Database = {
         Insert: {
           brand_id?: number | null
           category_id?: number | null
+          color?: string | null
           created_at?: string | null
           discount_percent?: number | null
           id?: number
           is_draft?: boolean | null
           is_featured?: boolean | null
+          material?: string | null
           price?: number
+          size?: string | null
           slug: string
           status?: boolean | null
           stock?: number
@@ -623,12 +834,15 @@ export type Database = {
         Update: {
           brand_id?: number | null
           category_id?: number | null
+          color?: string | null
           created_at?: string | null
           discount_percent?: number | null
           id?: number
           is_draft?: boolean | null
           is_featured?: boolean | null
+          material?: string | null
           price?: number
+          size?: string | null
           slug?: string
           status?: boolean | null
           stock?: number
@@ -792,7 +1006,7 @@ export type Database = {
     }
     Enums: {
       product_type: "physical" | "digital" | "license"
-      user_role: "admin" | "vendor" | "customer"
+      user_role: "admin" | "vendor" | "customer" | "moderator"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -924,7 +1138,7 @@ export const Constants = {
   public: {
     Enums: {
       product_type: ["physical", "digital", "license"],
-      user_role: ["admin", "vendor", "customer"],
+      user_role: ["admin", "vendor", "customer", "moderator"],
     },
   },
 } as const

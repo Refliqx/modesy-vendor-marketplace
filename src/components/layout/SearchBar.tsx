@@ -13,6 +13,7 @@ import { Search, X, Tag } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { useCurrencyStore } from "@/stores/useCurrencyStore";
+import { formatPrice as formatPriceUtil } from "@/lib/format-price";
 
 interface Suggestion {
   id: number;
@@ -75,15 +76,10 @@ export function SearchBar({ langId = 1 }: { langId?: number }) {
     });
   }, []);
 
-  const formatPrice = useCallback(
+  const formatPriceLabel = useCallback(
     (amount: number) => {
       if (!_hasHydrated || !selected) return "";
-      const converted = amount * (selected.exchange_rate ?? 1);
-      return new Intl.NumberFormat(undefined, {
-        style: "currency",
-        currency: selected.code,
-        maximumFractionDigits: 0,
-      }).format(converted);
+      return formatPriceUtil(amount * (selected.exchange_rate ?? 1), selected.code);
     },
     [_hasHydrated, selected]
   );
@@ -211,7 +207,7 @@ export function SearchBar({ langId = 1 }: { langId?: number }) {
               >
                 <span className="text-sm text-text-main truncate flex-1">{p.title}</span>
                 <span className="text-sm font-semibold text-primary shrink-0">
-                  {formatPrice(salePrice ?? p.price)}
+                  {formatPriceLabel(salePrice ?? p.price)}
                 </span>
               </Link>
             );

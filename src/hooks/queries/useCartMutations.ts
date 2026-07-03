@@ -26,9 +26,10 @@ export function useAddToCart() {
       if (res.error) throw new Error(res.error);
       return res;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
+      const user = useCartStore.getState().user;
       toast.success("Product successfully added to your cart!");
-      qc.invalidateQueries({ queryKey: ["cart"] });
+      qc.invalidateQueries({ queryKey: ["cart", user?.id ?? "guest", variables.locale] });
     },
     onError: (err: Error) => {
       toast.error(err.message);
@@ -73,10 +74,12 @@ export function useUpdateCartQty() {
       const res = await updateCartQtyAction(itemId, quantity);
       if (res.error) throw new Error(res.error);
     },
-    onMutate: async ({ itemId, quantity }) => {
-      await qc.cancelQueries({ queryKey: ["cart"] });
-      const snapshot = qc.getQueriesData({ queryKey: ["cart"] });
-      qc.setQueriesData({ queryKey: ["cart"] }, (old: any) => {
+    onMutate: async ({ itemId, quantity, locale }) => {
+      const user = useCartStore.getState().user;
+      const key: [string, string, string] = ["cart", user?.id ?? "guest", locale];
+      await qc.cancelQueries({ queryKey: key });
+      const snapshot = qc.getQueriesData({ queryKey: key });
+      qc.setQueriesData({ queryKey: key }, (old: any) => {
         if (!Array.isArray(old)) return old;
         return old.map((item: any) =>
           item.id === itemId ? { ...item, quantity } : item
@@ -92,8 +95,9 @@ export function useUpdateCartQty() {
       }
       toast.error(err.message);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["cart"] });
+    onSettled: (_data, _error, variables) => {
+      const user = useCartStore.getState().user;
+      qc.invalidateQueries({ queryKey: ["cart", user?.id ?? "guest", variables.locale] });
     },
   });
 }
@@ -127,10 +131,12 @@ export function useRemoveFromCart() {
       const res = await removeFromCartAction(itemId);
       if (res.error) throw new Error(res.error);
     },
-    onMutate: async ({ itemId }) => {
-      await qc.cancelQueries({ queryKey: ["cart"] });
-      const snapshot = qc.getQueriesData({ queryKey: ["cart"] });
-      qc.setQueriesData({ queryKey: ["cart"] }, (old: any) => {
+    onMutate: async ({ itemId, locale }) => {
+      const user = useCartStore.getState().user;
+      const key: [string, string, string] = ["cart", user?.id ?? "guest", locale];
+      await qc.cancelQueries({ queryKey: key });
+      const snapshot = qc.getQueriesData({ queryKey: key });
+      qc.setQueriesData({ queryKey: key }, (old: any) => {
         if (!Array.isArray(old)) return old;
         return old.filter((item: any) => item.id !== itemId);
       });
@@ -144,8 +150,9 @@ export function useRemoveFromCart() {
       }
       toast.error(err.message);
     },
-    onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["cart"] });
+    onSettled: (_data, _error, variables) => {
+      const user = useCartStore.getState().user;
+      qc.invalidateQueries({ queryKey: ["cart", user?.id ?? "guest", variables.locale] });
     },
   });
 }
@@ -168,11 +175,19 @@ export function useCreateSnapToken() {
   return useMutation({
     mutationFn: async (shippingAddress?: ShippingAddressPayload) => {
       const res = await createSnapTokenAction(shippingAddress as any);
-      if (res.error) throw new Error(res.error);
+      if (res.error) {
+        if (res.error === "unauthorized") {
+          throw new Error("Please login to continue with payment");
+        }
+        throw new Error(res.error);
+      }
       return res;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["cart"] });
+    },
+    onError: (err: Error) => {
+      toast.error(err.message);
     },
   });
 }
